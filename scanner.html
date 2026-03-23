@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Field Scanner - SYS WMS Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: "#f49000", "primary-container": "#fff9f0", error: "#ba1a1a" },
+          fontFamily: { sans: ["Inter", "sans-serif"], arabic: ["Cairo", "sans-serif"] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+    #reader { border: none !important; width: 100%; height: 100%; object-fit: cover; }
+    #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+    .glass-nav { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .scan-bracket {
+       position: absolute; width: 40px; height: 40px; border-color: #f49000; border-style: solid; z-index: 10;
+       transition: all 0.2s ease;
+    }
+    .bracket-tl { top: 25%; left: 15%; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
+    .bracket-tr { top: 25%; right: 15%; border-width: 4px 4px 0 0; border-top-right-radius: 12px; }
+    .bracket-bl { bottom: 25%; left: 15%; border-width: 0 0 4px 4px; border-bottom-left-radius: 12px; }
+    .bracket-br { bottom: 25%; right: 15%; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
+    .scanning .scan-bracket { border-color: #10b981; transform: scale(1.1); }
+  </style>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f49000">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased h-[100dvh] flex flex-col items-center overflow-hidden transition-all duration-300">
+
+  <!-- Header -->
+  <header class="w-full xl:max-w-md mx-auto glass-nav px-4 py-3 flex items-center justify-between z-50 flex-shrink-0 shadow-sm relative">
+    <div class="flex items-center gap-2">
+      <img src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" class="h-16 sm:h-20 w-auto object-contain drop-shadow-md scale-110" onerror="this.style.display='none';" />
+    </div>
+    <div class="flex items-center gap-3">
+       <button id="lang-btn" class="w-8 h-8 rounded-full bg-slate-100 font-black text-xs border border-slate-200 shadow-inner flex items-center justify-center text-primary">ع</button>
+       <div id="company-badge" class="hidden bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-600 items-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-[14px] text-primary">apartment</span>
+          <span id="company-code-display" class="tracking-widest filter"></span>
+          <button id="logout-btn" class="ml-1 text-slate-400 hover:text-red-500 transition-colors py-1"><span class="material-symbols-outlined text-[16px]">logout</span></button>
+       </div>
+    </div>
+  </header>
+
+  <main class="w-full xl:max-w-md mx-auto flex-1 flex flex-col relative h-full bg-slate-100 shadow-xl overflow-hidden">
+    
+    <!-- 1. Login Screen -->
+    <div id="login-screen" class="absolute inset-0 z-20 bg-slate-50 flex flex-col justify-center items-center p-6 pb-20 transition-transform duration-500 transform translate-y-0">
+      <div class="w-20 h-20 bg-white rounded-3xl shadow-md border border-slate-100 flex items-center justify-center mb-6">
+         <span class="material-symbols-outlined text-4xl text-primary">qr_code_scanner</span>
+      </div>
+      <h1 class="text-2xl font-black text-center mb-2" data-i18n="setup-title">Device Setup</h1>
+      <p class="text-sm text-center text-slate-500 mb-8 max-w-[250px]" data-i18n="setup-desc">Enter your Company Code to link this scanner to your database.</p>
+      
+      <div class="w-full bg-white p-6 rounded-3xl border border-slate-200 shadow-lg space-y-4 relative overflow-hidden">
+         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-primary"></div>
+         <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 text-center" data-i18n="company-code">Company Code</label>
+            <input type="text" id="login-code" placeholder="COM-XXXXXX" class="w-full px-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none font-black text-center tracking-widest text-xl text-slate-800 transition-all uppercase placeholder-slate-300">
+         </div>
+         <button id="login-submit" class="w-full bg-primary hover:bg-orange-600 outline-none text-white font-black py-4 rounded-2xl shadow-xl shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider text-sm">
+            <span data-i18n="authenticate">Authenticate</span> <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+         </button>
+      </div>
+    </div>
+
+    <!-- 2. Professional Scanner Interface -->
+    <div id="scanner-interface" class="hidden absolute inset-0 z-10 flex-col h-full bg-black">
+        
+        <!-- Floating Mode Selector -->
+        <div class="absolute top-4 left-4 right-4 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-1.5 rounded-2xl flex shadow-2xl">
+            <button id="mode-in" class="flex-1 py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-1.5 bg-emerald-500 text-white shadow-md active-mode">
+                <span class="material-symbols-outlined text-[18px]">login</span> <span data-i18n="check-in">Check In</span>
+            </button>
+            <button id="mode-out" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 text-white/70 hover:text-white">
+                <span class="material-symbols-outlined text-[18px]">logout</span> <span data-i18n="check-out">Check Out</span>
+            </button>
+        </div>
+
+        <!-- Camera Viewfinder -->
+        <div class="relative w-full h-full overflow-hidden bg-black flex items-center justify-center" id="camera-container">
+            <div id="reader" class="absolute inset-0"></div>
+            <!-- Targeting Brackets -->
+            <div id="scan-brackets">
+               <div class="scan-bracket bracket-tl"></div>
+               <div class="scan-bracket bracket-tr"></div>
+               <div class="scan-bracket bracket-bl"></div>
+               <div class="scan-bracket bracket-br"></div>
+            </div>
+            <!-- Overlay Mask Frame (Visual only) -->
+            <div class="absolute inset-x-0 top-0 h-[25%] bg-black/50 pointer-events-none transition-all"></div>
+            <div class="absolute inset-x-0 bottom-0 h-[35%] bg-black/50 pointer-events-none transition-all flex flex-col justify-end">
+                <div class="text-center pb-8 z-20">
+                   <p class="text-white text-xs font-bold px-4 tracking-wider uppercase opacity-80" id="scan-hint" data-i18n="point-camera">Point at Barcode</p>
+                </div>
+            </div>
+            <div class="absolute top-[25%] bottom-[35%] left-0 w-[15%] bg-black/50 pointer-events-none transition-all"></div>
+            <div class="absolute top-[25%] bottom-[35%] right-0 w-[15%] bg-black/50 pointer-events-none transition-all"></div>
+        </div>
+
+        <!-- Result / Confirmation Overlay -->
+        <div id="result-overlay" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.15)] z-30 transform translate-y-full transition-transform duration-300 pointer-events-none">
+             <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-2"></div>
+             <div class="p-6 pt-2 pointer-events-auto">
+                <div class="text-center mb-5">
+                   <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1" data-i18n="worker-profile">Worker Profile</p>
+                   <h3 id="res-worker-name" class="text-2xl font-black text-slate-900 mb-2">Loading...</h3>
+                   <div class="inline-flex items-center justify-center gap-1 bg-slate-100 px-3 py-1 rounded text-slate-600 font-bold text-xs border border-slate-200">
+                      <span class="material-symbols-outlined text-[14px]">barcode</span>
+                      <span id="res-worker-id" class="tracking-widest">--</span>
+                   </div>
+                </div>
+
+                <!-- Overtime Input (Only shows if Check Out) -->
+                <div id="ot-container" class="hidden bg-slate-50 p-4 border border-slate-200 rounded-2xl mb-5">
+                   <div class="flex items-center justify-between">
+                       <label class="text-xs font-black uppercase tracking-widest text-slate-500" data-i18n="overtime-hrs">Overtime (Hrs)</label>
+                       <div class="flex items-center gap-2 bg-white rounded-xl border border-slate-300 p-1 shadow-inner h-12">
+                          <button id="ot-minus" class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 font-bold active:bg-slate-200">-</button>
+                          <input type="number" id="res-ot" value="0" step="0.5" min="0" readonly class="w-12 bg-transparent text-center text-xl font-black text-primary outline-none p-0 border-none">
+                          <button id="ot-plus" class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 font-bold active:bg-slate-200">+</button>
+                       </div>
+                   </div>
+                </div>
+
+                <p id="res-message" class="text-center text-sm font-bold text-error hidden mb-4 bg-error/10 text-error p-3 rounded-xl border border-error/20"></p>
+
+                <div class="flex gap-3">
+                   <button id="btn-cancel" class="flex-1 py-4 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-600 font-black rounded-2xl transition-all active:scale-95 text-sm uppercase tracking-wider" data-i18n="btn-rescan">
+                      Rescan
+                   </button>
+                   <button id="btn-confirm" class="flex-[2] py-4 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed pointer-events-none">
+                       <span class="material-symbols-outlined text-[20px]">check_circle</span> <span id="btn-confirm-text">Confirm</span>
+                   </button>
+                </div>
+             </div>
+        </div>
+    </div>
+    
+  </main>
+
+  <!-- Big Success Overlay -->
+  <div id="success-flash" class="fixed inset-0 z-[100] bg-emerald-500 flex flex-col items-center justify-center text-white p-6 transform scale-110 opacity-0 pointer-events-none transition-all duration-[400ms]">
+      <span class="material-symbols-outlined text-8xl mb-4 text-white drop-shadow-lg" style="font-size: 100px;">check_circle</span>
+      <h2 class="text-4xl font-black text-center mb-2 drop-shadow-md" id="success-flash-title">Success!</h2>
+      <p class="text-xl font-bold opacity-90 text-center drop-shadow-md" id="success-flash-name"></p>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/scanner.js"></script>
+</body>
+</html>

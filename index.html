@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS WMS Pro</title>
+<link rel="icon" type="image/png" href="favicon.png?v=7" />
+    <!-- Use Google Fonts (Inter for En, Cairo for Ar) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/settings.js"></script>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f49000">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</head>
+<body class="theme-light">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar glass-panel">
+        <div class="sidebar-header">
+            <div class="logo">W</div>
+            <h2 class="app-title">SYS WMS Pro</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" data-tab="workers">👥 العمال / Workers</button>
+            <button class="nav-btn" data-tab="idcards">🪪 الهويات / ID Cards</button>
+            <button class="nav-btn" data-tab="attendance">📅 الحضور / Attendance</button>
+            <button class="nav-btn" data-tab="advances">💸 السلف / Advances</button>
+            <button class="nav-btn" data-tab="reports">📄 التقرير / Reports</button>
+            <button class="nav-btn" data-tab="settings">⚙️ الإعدادات / Settings</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="langToggle" class="btn-secondary">عربي / English</button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        <!-- Dashboard Top Bar -->
+        <header class="topbar glass-panel">
+            <h1 id="page-title">إدارة العمال</h1>
+            <div class="topbar-actions">
+                <input type="text" id="searchInput" placeholder="بحث بالاسم أو الرقم..." class="input-search">
+                <button id="themeToggle" class="btn-icon">🌓</button>
+            </div>
+        </header>
+
+        <!-- Tab Views Container -->
+        <div id="views-container" class="views-container">
+            
+            <!-- Workers View -->
+            <section id="view-workers" class="view active">
+                <div class="view-header">
+                    <button class="btn-primary" id="btnNewWorker">+ عامل جديد / New Worker</button>
+                </div>
+                <div class="table-container glass-panel">
+                    <table id="workersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>الاسم / Name</th>
+                                <th>الوظيفة / Position</th>
+                                <th>الراتب / Salary</th>
+                                <th>التاريخ / Date</th>
+                                <th>إجراء / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Attendance View -->
+            <section id="view-attendance" class="view">
+                <div class="view-header" style="justify-content: flex-start; gap: 16px;">
+                    <input type="date" id="attendance-date" class="input-search">
+                    <input type="text" id="attendance-barcode" placeholder="اضغط هنا لمسح الباركود / Scan Barcode..." class="input-search" style="width: 300px;">
+                </div>
+                <div class="table-container glass-panel">
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>الاسم / Name</th>
+                                <th>الحالة / Status</th>
+                                <th>إضافي(س) / OT(hrs)</th>
+                                <th>ملاحظات / Notes</th>
+                                <th>إجراء / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Advances View -->
+            <section id="view-advances" class="view">
+                <div class="view-header">
+                    <button class="btn-primary" id="btnNewAdvance">+ سلفة جديدة / New Advance</button>
+                </div>
+                <div class="table-container glass-panel">
+                    <table id="advancesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>الاسم / Name</th>
+                                <th>التاريخ / Date</th>
+                                <th>المبلغ / Amount</th>
+                                <th>السبب / Reason</th>
+                                <th>إجراء / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Reports View -->
+            <section id="view-reports" class="view">
+                <div class="view-header topbar-actions" style="justify-content: flex-start;">
+                    <input type="date" id="report-start-date" class="input-search" title="Start Date">
+                    <input type="date" id="report-end-date" class="input-search" title="End Date">
+                    <button class="btn-primary" id="btnRunReport">📄 عرض التقرير / Run Report</button>
+                    <button class="btn-secondary" id="btnPrintReport">🖨️ طباعة / Print</button>
+                </div>
+                <div class="table-container glass-panel" id="report-print-container">
+                    <h2 id="report-print-title" class="hidden" style="text-align:center; margin-bottom: 20px;">تقرير الرواتب / Salary Report</h2>
+                    <table id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>الاسم / Name</th>
+                                <th>اليومية / Rate</th>
+                                <th>أيام / Days</th>
+                                <th>الراتب / Reg. Pay</th>
+                                <th>السلف / Advances</th>
+                                <th>الصافي / Net Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot id="reportsFooter" style="font-weight: bold; background: hsla(0,0%,50%,0.1);">
+                            <!-- Totals -->
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+            <!-- ID Cards View -->
+            <section id="view-idcards" class="view">
+                <div class="view-header">
+                    <button class="btn-primary" id="btnPrintIDCards">🖨️ طباعة الهويات المحددة / Print Selected</button>
+                </div>
+                <div class="table-container glass-panel">
+                    <table id="idcardsTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllIDs"></th>
+                                <th>ID</th>
+                                <th>الاسم / Name</th>
+                                <th>الوظيفة / Position</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="view-settings" class="view"><h2>Settings (WIP)</h2></section>
+            
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="worker-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <h2 id="modal-title">عامل جديد / New Worker</h2>
+            <form id="worker-form">
+                <input type="hidden" id="worker-id">
+                
+                <div class="form-group">
+                    <label>الاسم / Name</label>
+                    <input type="text" id="worker-name" required class="input-search" style="width:100%;">
+                </div>
+                
+                <div class="form-group">
+                    <label>الوظيفة / Position</label>
+                    <input type="text" id="worker-position" required class="input-search" style="width:100%;">
+                </div>
+                
+                <div class="form-group">
+                    <label>الراتب اليومي (د.ع) / Daily Salary</label>
+                    <input type="number" id="worker-salary" required class="input-search" style="width:100%;">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancel-worker">إلغاء / Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-save-worker">حفظ / Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="advance-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <h2 id="adv-modal-title">سلفة جديدة / New Advance</h2>
+            <form id="advance-form">
+                <input type="hidden" id="advance-id">
+                
+                <div class="form-group">
+                    <label>اختر العامل / Select Worker</label>
+                    <select id="advance-worker-id" required class="input-search" style="width:100%;"></select>
+                </div>
+                
+                <div class="form-group">
+                    <label>المبلغ (د.ع) / Amount</label>
+                    <input type="number" id="advance-amount" required class="input-search" style="width:100%;">
+                </div>
+                
+                <div class="form-group">
+                    <label>السبب / Reason</label>
+                    <input type="text" id="advance-reason" class="input-search" style="width:100%;">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancel-advance">إلغاء / Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-save-advance">حفظ / Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Print Area for ID Cards -->
+    <div id="print-area" class="print-area hidden"></div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

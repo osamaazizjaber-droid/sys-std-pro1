@@ -1,0 +1,265 @@
+/* ============================================================
+   SYS WMS Pro — Global Theme Variables
+   Supports: 5 themes × light/dark + bilingual fonts
+   ============================================================ */
+
+/* ── 1. FORGE ORANGE (Default) ─────────────────────────────── */
+:root,
+[data-theme="forge"] {
+  --clr-primary:          #8b5000;
+  --clr-primary-light:    #f49000;
+  --clr-primary-hover:    #7a4500;
+  --clr-accent:           #f49000;
+  --clr-accent-soft:      #fff3e0;
+  --clr-bg:               #f8f9fa;
+  --clr-surface:          #ffffff;
+  --clr-surface-2:        #f1f3f5;
+  --clr-surface-3:        #e9ecef;
+  --clr-border:           #dee2e6;
+  --clr-text:             #191c1d;
+  --clr-text-muted:       #6c757d;
+  --clr-error:            #ba1a1a;
+  --clr-success:          #10b981;
+  --clr-nav-bg:           #ffffff;
+  --clr-nav-border:       #e9ecef;
+  --clr-sidebar-bg:       #f1f3f5;
+  --shadow-xs:   0 1px 3px rgba(0,0,0,0.06);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.10);
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+}
+
+/* ── 2. SLATE PRO (Blue) ────────────────────────────────────── */
+[data-theme="slate"] {
+  --clr-primary:          #1e40af;
+  --clr-primary-light:    #3b82f6;
+  --clr-primary-hover:    #1d3899;
+  --clr-accent:           #3b82f6;
+  --clr-accent-soft:      #eff6ff;
+  --clr-bg:               #f8faff;
+  --clr-surface:          #ffffff;
+  --clr-surface-2:        #f0f4ff;
+  --clr-surface-3:        #e0e9ff;
+  --clr-border:           #c7d7f5;
+  --clr-text:             #0f172a;
+  --clr-text-muted:       #64748b;
+  --clr-nav-bg:           #ffffff;
+  --clr-nav-border:       #e0e9ff;
+  --clr-sidebar-bg:       #f0f4ff;
+}
+
+/* ── 3. EMERALD (Green) ─────────────────────────────────────── */
+[data-theme="emerald"] {
+  --clr-primary:          #065f46;
+  --clr-primary-light:    #10b981;
+  --clr-primary-hover:    #054f3b;
+  --clr-accent:           #10b981;
+  --clr-accent-soft:      #ecfdf5;
+  --clr-bg:               #f0fdf4;
+  --clr-surface:          #ffffff;
+  --clr-surface-2:        #e9faf1;
+  --clr-surface-3:        #d1fae5;
+  --clr-border:           #a7f3d0;
+  --clr-text:             #052e16;
+  --clr-text-muted:       #6b7280;
+  --clr-nav-bg:           #ffffff;
+  --clr-nav-border:       #d1fae5;
+  --clr-sidebar-bg:       #e9faf1;
+}
+
+/* ── 4. ROSE GOLD (Red) ─────────────────────────────────────── */
+[data-theme="rose"] {
+  --clr-primary:          #9f1239;
+  --clr-primary-light:    #e11d48;
+  --clr-primary-hover:    #881031;
+  --clr-accent:           #e11d48;
+  --clr-accent-soft:      #fff1f2;
+  --clr-bg:               #fff5f7;
+  --clr-surface:          #ffffff;
+  --clr-surface-2:        #ffe4ea;
+  --clr-surface-3:        #fecdd3;
+  --clr-border:           #fda4af;
+  --clr-text:             #1c0007;
+  --clr-text-muted:       #71717a;
+  --clr-nav-bg:           #ffffff;
+  --clr-nav-border:       #fecdd3;
+  --clr-sidebar-bg:       #ffe4ea;
+}
+
+/* ── 5. VIOLET ──────────────────────────────────────────────── */
+[data-theme="violet"] {
+  --clr-primary:          #4c1d95;
+  --clr-primary-light:    #7c3aed;
+  --clr-primary-hover:    #3b1578;
+  --clr-accent:           #7c3aed;
+  --clr-accent-soft:      #f5f3ff;
+  --clr-bg:               #faf5ff;
+  --clr-surface:          #ffffff;
+  --clr-surface-2:        #f0ebff;
+  --clr-surface-3:        #e0d5ff;
+  --clr-border:           #c4b5fd;
+  --clr-text:             #1e0050;
+  --clr-text-muted:       #7c6f9e;
+  --clr-nav-bg:           #ffffff;
+  --clr-nav-border:       #e0d5ff;
+  --clr-sidebar-bg:       #f0ebff;
+}
+
+/* ================================================================
+   DARK MODE — applied on top of each theme via [data-dark="true"]
+   ================================================================ */
+[data-dark="true"] {
+  --clr-bg:               #020617; /* Deep Slate-950 */
+  --clr-surface:          #0f172a; /* Slate-900 surface */
+  --clr-surface-2:        #1e293b; /* Slate-800 for headers and active states */
+  --clr-surface-3:        #334155; /* Slate-700 */
+  --clr-border:           #334155; /* Sharp legible border */
+  --clr-text:             #ffffff; /* Pristine white for high-contrast data */
+  --clr-text-muted:       #94a3b8; /* Slate-400 */
+  --clr-nav-bg:           #020617;
+  --clr-nav-border:       #1e293b;
+  --clr-sidebar-bg:       #020617;
+}
+
+/* Dark accent-soft stays readable */
+[data-dark="true"] { --clr-accent-soft: rgba(255,255,255,0.06); }
+
+/* ================================================================
+   UTILITY APPLICATION LAYER
+   Maps WMS-theme variables onto the page elements
+   ================================================================ */
+
+body {
+  background-color: var(--clr-bg) !important;
+  color: var(--clr-text) !important;
+  transition: background-color 0.25s, color 0.25s;
+}
+
+/* Nav / Header */
+header {
+  background-color: var(--clr-nav-bg) !important;
+  border-color: var(--clr-nav-border) !important;
+}
+
+/* Cards / Surfaces */
+.bg-white {
+  background-color: var(--clr-surface) !important;
+}
+.bg-slate-50, .bg-slate-100 {
+  background-color: var(--clr-surface-2) !important;
+}
+.bg-slate-200 {
+  background-color: var(--clr-surface-3) !important;
+}
+
+/* Text */
+.text-slate-900, .text-slate-800, .text-slate-700, .text-on-surface {
+  color: var(--clr-text) !important;
+}
+.text-slate-500, .text-slate-400, .text-slate-600 {
+  color: var(--clr-text-muted) !important;
+}
+
+/* Borders */
+.border-slate-100, .border-slate-200 {
+  border-color: var(--clr-border) !important;
+}
+
+/* Primary accent */
+.text-primary, .text-orange-600 {
+  color: var(--clr-primary-light) !important;
+}
+.bg-primary, .bg-orange-700, .bg-orange-800 {
+  background-color: var(--clr-primary) !important;
+}
+.border-primary, .border-l-4.border-primary {
+  border-color: var(--clr-primary-light) !important;
+}
+.bg-primary-container, .bg-orange-400 {
+  background-color: var(--clr-accent) !important;
+}
+
+/* Active nav link */
+.border-b-2.border-primary {
+  border-color: var(--clr-primary-light) !important;
+  color: var(--clr-primary-light) !important;
+}
+
+/* Table hover rows */
+tr.hover\:bg-slate-50\/50:hover, tr.hover\:bg-slate-50:hover {
+  background-color: var(--clr-surface-2) !important;
+}
+thead tr {
+  background-color: var(--clr-surface-2) !important;
+}
+
+/* ================================================================
+   DEEP DARK MODE OVERRIDES (High Contrast Data Tables)
+   ================================================================ */
+[data-dark="true"] .bg-white,
+[data-dark="true"] .bg-surface-container-lowest,
+[data-dark="true"] .bg-surface-light {
+  background-color: var(--clr-surface) !important;
+}
+
+[data-dark="true"] .bg-surface {
+  background-color: var(--clr-bg) !important;
+}
+
+[data-dark="true"] .bg-slate-50,
+[data-dark="true"] .bg-slate-100,
+[data-dark="true"] .bg-surface-container-low,
+[data-dark="true"] .bg-surface-container,
+[data-dark="true"] .bg-slate-50\/50 {
+  background-color: var(--clr-surface-2) !important;
+}
+
+[data-dark="true"] .bg-slate-200,
+[data-dark="true"] .bg-surface-container-high,
+[data-dark="true"] .bg-surface-container-highest {
+  background-color: var(--clr-surface-3) !important;
+}
+
+[data-dark="true"] .text-slate-900,
+[data-dark="true"] .text-slate-800,
+[data-dark="true"] .text-slate-700,
+[data-dark="true"] .text-on-surface,
+[data-dark="true"] .text-light {
+  color: var(--clr-text) !important;
+}
+
+[data-dark="true"] .text-slate-500,
+[data-dark="true"] .text-slate-400,
+[data-dark="true"] .text-slate-600,
+[data-dark="true"] .text-on-surface-variant {
+  color: var(--clr-text-muted) !important;
+}
+
+[data-dark="true"] .border-slate-100,
+[data-dark="true"] .border-slate-200,
+[data-dark="true"] .border-outline-variant,
+[data-dark="true"] .border-outline-variant\/15,
+[data-dark="true"] .border-outline-variant\/20,
+[data-dark="true"] .border-outline-variant\/30,
+[data-dark="true"] .border-surface-container,
+[data-dark="true"] .border-surface-variant,
+[data-dark="true"] .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+[data-dark="true"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--clr-border) !important;
+}
+
+[data-dark="true"] input, 
+[data-dark="true"] select {
+  background-color: var(--clr-bg) !important;
+  color: var(--clr-text) !important;
+  border-color: var(--clr-border) !important;
+  color-scheme: dark;
+}
+
+[data-dark="true"] .shadow-sm,
+[data-dark="true"] .shadow-md,
+[data-dark="true"] [class*="shadow-"] {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}

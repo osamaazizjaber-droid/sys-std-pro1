@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SYS WMS Pro</title>
+    <link rel="icon" type="image/png" href="favicon.png?v=7" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="css/themes.css"/>
+    <script src="js/settings.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#8cceff",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9fa",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-container": "#edeeef",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "primary": "#8b5000",
+                        "primary-container": "#f49000",
+                        "on-surface": "#191c1d",
+                        "on-background": "#191c1d",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "body": ["var(--wms-font)", "Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(136, 115, 98, 0.1);
+        }
+        
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            header.sticky, .hide-on-print { display: none !important; }
+            
+            /* Destroy all fixed-width clipping masks so native print scaling maps the entire table organically */
+            body, main, .relative, .layout-container, .layout-content-container { 
+                background: white !important; 
+                display: block !important; 
+                width: auto !important; 
+                min-width: 0 !important;
+                max-width: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+            }
+            .overflow-x-auto, .overflow-hidden {
+                overflow: visible !important; 
+                position: static !important;
+                width: auto !important;
+            }
+            .print-break { page-break-before: always !important; break-before: page !important; }
+            #print-report-header { display: block !important; }
+            
+            /* Squeeze the entire content to prevent columns from cutting off on A4 landscape */
+            table { font-size: 8px !important; width: 100% !important; page-break-inside: auto; border-collapse: collapse !important; }
+            thead { display: table-header-group !important; }
+            tfoot { display: table-footer-group !important; }
+            th, td { padding: 2px !important; min-width: 0 !important; width: auto !important; overflow-wrap: break-word; }
+            th:first-child, td:first-child { min-width: 70px !important; }
+            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
+            /* Target the specific Tailwind wrapper blocking scaling */
+            .w-48, .min-w-\[40px\], .w-10 { width: auto !important; min-width: 0 !important; max-width: none !important; }
+            
+            /* Ensure the metrics grid prints nicely in a row */
+            .grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 10px !important; zoom: 0.8; }
+            .bg-white { border: 1px solid #ddd !important; box-shadow: none !important; }
+        }
+    </style>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f49000">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body">
+    <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+
+            <!-- Top Navigation Bar -->
+            <header class="w-full bg-white border-b border-surface-variant px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+                <div class="flex items-center gap-3 text-on-surface">
+                    <div class="h-16 w-auto flex items-center">
+                        <img alt="SYS WMS Pro Logo" class="h-full object-contain scale-[1.3] origin-left" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" />
+                    </div>
+                    <h2 class="text-xl font-black tracking-tighter text-slate-900">SYS WMS Pro</h2>
+                </div>
+                <nav class="flex items-center gap-6">
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="workers.html" data-i18n="workers">Workers Management</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="advances.html" data-i18n="advances">Cash Advances</a>
+                    <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="reports.html" data-i18n="reports">Reports</a>
+                    <div data-wms-settings-wrapper style="position:relative;">
+                      <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
+                        <span data-i18n="settings" data-i18n="settings">Settings</span>
+                        <span class="material-symbols-outlined" style="font-size:16px;line-height:1;">expand_more</span>
+                      </button>
+                    </div>
+                </nav>
+                <div class="flex items-center gap-2">
+                  <button id="hdr-lang-btn" title="Toggle Language"
+                    class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border"
+                    style="border-color:var(--clr-border,#e9ecef);color:var(--clr-text-muted,#6c757d);background:var(--clr-surface-2,#f1f3f5);">
+                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
+                  </button>
+                  <button id="hdr-dark-btn" title="Toggle Dark Mode"
+                    class="w-9 h-9 rounded-full flex items-center justify-center border"
+                    style="background:var(--clr-surface-2,#f1f3f5);color:var(--clr-text-muted,#6c757d);border-color:var(--clr-border,#e9ecef);">
+                    <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+                  </button>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
+                <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0 hide-on-print">
+                    <div>
+                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="reports-title">Payroll & Attendance</h2>
+                        <p class="text-sm text-on-surface-variant mt-1"><span data-i18n="reports-sub">Operational audit for</span> <span id="date-range-display" class="font-bold text-on-surface">Loading...</span></p>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center bg-surface-container p-1 rounded-xl border border-outline-variant/30">
+                            <div class="flex flex-col px-3 border-r border-outline-variant/30">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="start-date">Date Range Start</label>
+                                <input type="date" id="report-start-date" class="border-none bg-transparent text-sm font-semibold text-on-surface focus:ring-0 p-0 m-0 outline-none cursor-pointer text-slate-900 dark:text-slate-100">
+                            </div>
+                            <div class="flex flex-col px-3">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="end-date">Date Range End</label>
+                                <input type="date" id="report-end-date" class="border-none bg-transparent text-sm font-semibold text-on-surface focus:ring-0 p-0 m-0 outline-none cursor-pointer text-slate-900 dark:text-slate-100">
+                            </div>
+                        </div>
+                        <button id="btnRunReport" class="px-5 py-2.5 bg-surface hover:bg-surface-container-high text-on-surface rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-outline-variant/30 shadow-sm">
+                            <span class="material-symbols-outlined text-lg">sync</span> <span data-i18n="run-report">Compute</span>
+                        </button>
+                        <button id="btnPrintReport" class="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-container text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-all">
+                            <span class="material-symbols-outlined text-lg">print</span> <span data-i18n="export-pdf">Export PDF</span>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="flex-1 overflow-y-auto w-full p-6 lg:p-8">
+                    <div class="layout-content-container flex flex-col w-full max-w-[1400px] mx-auto flex-1 gap-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 mb-8">
+                <div class="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm space-y-2">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="gross-pay">Total Gross Pay</p>
+                    <h3 id="kpi-gross-pay" class="text-2xl font-black text-on-surface">...</h3>
+                    <div class="flex items-center gap-1 text-emerald-600 text-[10px] font-bold">
+                        <span class="material-symbols-outlined text-sm">calendar_month</span> <span id="kpi-date-range">Loading Period...</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="net-pay">Total Net Pay</p>
+                    <h3 id="kpi-net-pay" class="text-2xl font-black text-on-surface">...</h3>
+                    <div class="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
+                        <span class="material-symbols-outlined text-sm">payments</span> <span data-i18n="gross-minus-adv">Gross minus Advances</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ot-logged">Total OT Logged</p>
+                    <h3 id="kpi-ot-hrs" class="text-2xl font-black text-on-surface">...</h3>
+                    <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
+                        <span class="material-symbols-outlined text-sm">schedule</span> <span data-i18n="paid-standard">Paid at Standard Rate (1x)</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="advances-deducted">Advances Deducted</p>
+                    <h3 id="kpi-advances" class="text-2xl font-black text-error">...</h3>
+                    <p class="text-[10px] text-slate-400 font-bold" data-i18n="recovered-payroll">Recovered from payroll</p>
+                </div>
+            </div>
+
+            <!-- Print-Only Report Header -->
+            <div class="hidden print:block border-b-2 border-primary pb-4 mb-2" style="display:none;" id="print-report-header">
+                <h2 class="text-2xl font-black text-slate-900" data-i18n="print-report-title">SYS WMS Pro &mdash; Payroll &amp; Attendance Report</h2>
+                <p class="text-sm text-slate-500 mt-1"><span data-i18n="reporting-period">Reporting Period:</span> <strong id="print-period-display" class="text-slate-800">—</strong></p>
+            </div>
+
+            <!-- Salary Report Section -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-lg font-bold flex items-center gap-2 text-on-surface">
+                        <span class="w-2 h-6 bg-primary rounded-full"></span>
+                        <span data-i18n="salary-report">Salary Reconciliation Report</span>
+                    </h4>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto custom-scrollbar border-b border-slate-100">
+                        <table class="w-full text-start border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="worker-id">ID</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="full-name">Name</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="position">Pos</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="daily-rate">Daily Rate</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="days">Days</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="ot-hrs">OT Hrs</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="reg-pay">Reg Pay</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="ot-pay">OT Pay</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="gross">Gross</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="advances">Advances</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-primary tracking-tighter text-end" data-i18n="net-pay-col">Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-tbody" class="divide-y divide-slate-50">
+                                <tr><td colspan="11" class="p-12 text-center text-slate-400 font-bold tracking-widest"><span class="material-symbols-outlined animate-spin text-3xl mb-2">sync</span><br>Computing Matrix...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Attendance Matrix -->
+            <section class="space-y-4 print-break">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-lg font-bold flex items-center gap-2 text-on-surface">
+                        <span class="w-2 h-6 bg-primary rounded-full"></span>
+                        <span data-i18n="attendance-matrix">Attendance Heatmap Matrix</span>
+                    </h4>
+                    <div class="flex items-center gap-4 text-xs">
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> <span data-i18n="present">Present</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-error"></span> <span data-i18n="absent">Absent</span></div>
+                    </div>
+                </div>
+                
+                <div id="original-matrix-wrapper" class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-center border-collapse">
+                            <thead>
+                                <tr id="matrix-head" class="bg-slate-50 border-b border-slate-200">
+                                    <th class="p-4 text-[10px] font-black uppercase text-on-surface tracking-tighter text-left sticky left-0 bg-slate-100 z-10 w-48 shadow-[2px_0_5px_rgba(0,0,0,0.02)]" data-i18n="worker-name">Worker Name</th>
+                                    <!-- Dynamic Days Header Injected Here -->
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-tbody" class="divide-y divide-slate-50">
+                                <!-- Matrix Injected Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <div class="h-10"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/guard.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/reports.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const S = window.WMSSettings;
+      if (!S) return;
+      function syncUI() {
+        const langLabel = document.getElementById('hdr-lang-label');
+        const darkIcon  = document.getElementById('hdr-dark-icon');
+        if (langLabel) langLabel.textContent = S.get('lang').toUpperCase();
+        if (darkIcon) darkIcon.textContent = S.get('dark') === 'true' ? 'light_mode' : 'dark_mode';
+      }
+      document.getElementById('hdr-lang-btn')?.addEventListener('click', () => { S.set('lang', S.get('lang') === 'en' ? 'ar' : 'en'); syncUI(); });
+      document.getElementById('hdr-dark-btn')?.addEventListener('click', () => { S.set('dark', S.get('dark') === 'true' ? 'false' : 'true'); syncUI(); });
+      syncUI();
+    });
+    </script>
+</body>
+</html>

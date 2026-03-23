@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SYS WMS Pro</title>
+    <link rel="icon" type="image/png" href="favicon.png?v=7" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="css/themes.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .glass-overlay { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.2); }
+        .slider-bg { background-image: url('https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/layout%20pics/pic01.png'); background-size: cover; background-position: center; transition: background-image 1s ease-in-out; }
+        .form-panel { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; }
+        .hidden-panel { transform: translateY(20px); opacity: 0; pointer-events: none; position: absolute; }
+        .active-panel { transform: translateY(0); opacity: 1; pointer-events: auto; position: relative; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: "#f49000", "primary-dark": "#d97700", surface: "#f8f9fa", "on-surface": "#191c1d" },
+                    fontFamily: { body: ["Inter", "sans-serif"] }
+                }
+            }
+        }
+    </script>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f49000">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased h-screen w-full overflow-hidden flex flex-col md:flex-row">
+    
+    <!-- Left Side: Dynamic Slider (Hidden on small screens) -->
+    <div id="slider-container" class="hidden md:flex md:w-1/2 h-full slider-bg relative flex-col justify-end p-12">
+        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+        <div id="slider-content" class="relative z-10 p-10 max-w-xl mb-12 transform transition-all duration-700 opacity-100 translate-y-0">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6 shadow-lg">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-white/90 text-xs font-bold uppercase tracking-widest">SYS WMS Pro</span>
+            </div>
+            <h2 id="slider-title" class="text-4xl md:text-5xl font-black text-white mb-6 leading-tight drop-shadow-xl" data-i18n="auth-slider-title-1">Welcome to the Comprehensive Worker Management System</h2>
+            <p id="slider-desc" class="text-slate-300 text-lg md:text-xl leading-relaxed font-medium drop-shadow-md max-w-lg" data-i18n="auth-slider-desc-1">Your integrated platform for registering worker data, tracking daily attendance, and organizing salaries and advances with ease and professionalism.</p>
+            <div class="flex gap-3 mt-10" id="slider-dots">
+                <div class="w-10 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(244,144,0,0.8)] transition-all"></div>
+                <div class="w-3 h-1.5 rounded-full bg-white/20 hover:bg-white/40 cursor-pointer transition-all"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Auth Forms -->
+    <div class="w-full md:w-1/2 h-full bg-white flex flex-col items-center justify-center p-8 relative overflow-y-auto wms-font-override">
+        <!-- Language Switcher -->
+        <div class="absolute top-6 right-6 flex items-center gap-2 z-50">
+            <button onclick="WMSSettings.setL('en')" class="px-3 py-1 text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors">EN</button>
+            <button onclick="WMSSettings.setL('ar')" class="px-3 py-1 text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors font-body">عربي</button>
+        </div>
+
+        <div class="w-full max-w-md relative mt-8">
+            
+            <!-- LOGIN PANEL -->
+            <div id="login-panel" class="form-panel active-panel w-full flex flex-col items-center">
+                <img src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" alt="Logo" class="w-24 h-24 mb-6 object-contain" onerror="this.style.display='none'">
+                <h1 class="text-2xl font-black text-slate-900 mb-8 tracking-tight" data-i18n="auth-welcome">Welcome Back</h1>
+
+                <form id="login-form" class="w-full space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-email">Email Address</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-password">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900" dir="ltr">
+                    </div>
+                    
+                    <div id="login-status" class="text-sm font-bold text-red-500 text-center hidden pt-2"></div>
+
+                    <button type="submit" id="btn-login" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4">
+                        <span class="btn-text" data-i18n="auth-login-btn">Log In</span>
+                        <span class="material-symbols-outlined hidden animate-spin">refresh</span>
+                    </button>
+                    
+                    <div class="pt-6 border-t border-slate-100 mt-6 w-full text-center">
+                        <p class="text-sm text-slate-500 font-medium"><span data-i18n="auth-no-account">Don't have an account?</span> 
+                            <button type="button" onclick="switchPanel('register')" class="text-primary font-bold hover:underline" data-i18n="auth-create-account">Create an Account</button>
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- REGISTER PANEL -->
+            <div id="register-panel" class="form-panel hidden-panel w-full flex flex-col items-center">
+                <img src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" alt="Logo" class="w-16 h-16 mb-4 object-contain" onerror="this.style.display='none'">
+                <h1 class="text-2xl font-black text-slate-900 mb-6 tracking-tight" data-i18n="auth-reg-title">Register Company</h1>
+
+                <form id="register-form" class="w-full space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-reg-company">Company Name</label>
+                        <input type="text" id="reg-company" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-reg-name">Full Name</label>
+                        <input type="text" id="reg-name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-reg-pos">Position</label>
+                            <input type="text" id="reg-position" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-reg-phone">Phone</label>
+                            <input type="tel" id="reg-phone" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900" dir="ltr">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-email">Email Address</label>
+                        <input type="email" id="reg-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="auth-password">Password</label>
+                        <input type="password" id="reg-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-slate-900" minlength="6" dir="ltr">
+                    </div>
+                    
+                    <div id="reg-status" class="text-sm font-bold text-red-500 text-center hidden pt-2"></div>
+
+                    <button type="submit" id="btn-register" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-lg shadow-black/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4">
+                        <span class="btn-text" data-i18n="auth-reg-btn">Submit Registration</span>
+                        <span class="material-symbols-outlined hidden animate-spin">refresh</span>
+                    </button>
+                    
+                    <div class="pt-4 w-full text-center">
+                        <button type="button" onclick="switchPanel('login')" class="text-slate-500 font-bold hover:text-slate-900 flex items-center justify-center gap-1 mx-auto text-sm transition-colors">
+                            <span class="material-symbols-outlined text-[18px]" dir="ltr">arrow_back</span> <span data-i18n="auth-back-login">Back to Login</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <!-- Add Settings JS for global I18N injection -->
+    <script src="js/settings.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Apply immediate translations
+        window.addEventListener('wms-settings-update', () => {
+            if(window.WMSSettings && window.WMSSettings.applyT) {
+                const lang = window.WMSSettings.get('lang');
+                window.WMSSettings.applyT(lang);
+                updateSliderText();
+            }
+        });
+
+        const slides = [
+            { img: 'https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/layout%20pics/pic01.png', titleKey: 'auth-slider-title-1', descKey: 'auth-slider-desc-1' },
+            { img: 'https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/layout%20pics/pic02.png', titleKey: 'auth-slider-title-2', descKey: 'auth-slider-desc-2' }
+        ];
+        let currentSlide = 0;
+        const sliderContent = document.getElementById('slider-content');
+        const sliderContainer = document.getElementById('slider-container');
+        const sliderTitle = document.getElementById('slider-title');
+        const sliderDesc = document.getElementById('slider-desc');
+        const sliderDots = document.getElementById('slider-dots');
+
+        function updateSliderText() {
+            const lang = window.WMSSettings ? window.WMSSettings.get('lang') : 'en';
+            const dict = window.WMS_I18N[lang] || window.WMS_I18N['en'];
+            const s = slides[currentSlide];
+            sliderTitle.textContent = dict[s.titleKey] || "Welcome to the Comprehensive Worker Management System";
+            sliderDesc.textContent = dict[s.descKey];
+        }
+
+        function updateSlider() {
+            // Fade out
+            sliderContent.classList.remove('opacity-100', 'translate-y-0');
+            sliderContent.classList.add('opacity-0', 'translate-y-4');
+            
+            setTimeout(() => {
+                currentSlide = (currentSlide + 1) % slides.length;
+                const s = slides[currentSlide];
+                sliderContainer.style.backgroundImage = `url('${s.img}')`;
+                updateSliderText();
+                sliderDots.innerHTML = slides.map((_, i) => `<div class="${i === currentSlide ? 'w-10 bg-primary shadow-[0_0_10px_rgba(244,144,0,0.8)]' : 'w-3 bg-white/20'} h-1.5 rounded-full transition-all duration-300"></div>`).join('');
+                
+                // Fade in
+                sliderContent.classList.remove('opacity-0', 'translate-y-4');
+                sliderContent.classList.add('opacity-100', 'translate-y-0');
+            }, 400); // Wait for fade out to complete
+        }
+        setInterval(updateSlider, 6000);
+
+        function switchPanel(panel) {
+            const login = document.getElementById('login-panel');
+            const register = document.getElementById('register-panel');
+            if (panel === 'register') {
+                login.className = 'form-panel hidden-panel w-full flex flex-col items-center';
+                register.className = 'form-panel active-panel w-full flex flex-col items-center';
+            } else {
+                register.className = 'form-panel hidden-panel w-full flex flex-col items-center';
+                login.className = 'form-panel active-panel w-full flex flex-col items-center';
+            }
+        }
+
+        // Init language payload on load
+        setTimeout(() => {
+            if(window.WMSSettings && window.WMSSettings.applyT){
+                 window.WMSSettings.applyT(window.WMSSettings.get('lang'));
+                 updateSliderText();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
