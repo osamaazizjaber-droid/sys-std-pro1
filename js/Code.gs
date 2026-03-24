@@ -45,7 +45,7 @@ function doPost(e) {
           <p style="font-size: 16px; color: #333;">Hello <strong>${companyName}</strong>,</p>
           <p style="font-size: 16px; color: #555; line-height: 1.5;">Your company registration has been officially approved by the administrator. You now have full access to your intelligent dashboard.</p>
           
-          <a href="#" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #f49000; color: white; text-decoration: none; font-weight: bold; border-radius: 6px;">Login to Dashboard</a>
+          <a href="https://osamaazizjaber-droid.github.io/sys-wms-pro/" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #f49000; color: white; text-decoration: none; font-weight: bold; border-radius: 6px;">Login to Dashboard</a>
           
           <p style="margin-top: 30px; font-size: 13px; color: #888;">Thank you,<br>The Administration Team</p>
         </div>
