@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS public.attendance (
     status text,
     check_in text,
     check_out text,
+    academic_year text,
     notes text,
     unique(student_id, date, subject, prof_id)
 );

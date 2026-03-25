@@ -12,44 +12,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     const kpiTotalProfessors = document.getElementById('kpi-total-professors');
 
     async function loadMetrics() {
-        try {
-            const currentYear = window.WMSSettings ? window.WMSSettings.get('academic_year') : '';
+        const currentYear = window.WMSSettings ? window.WMSSettings.get('academic_year') : '';
 
-            // 1. Total Students
+        // 1. Total Students
+        try {
             let studentQuery = supabase.from('students').select('*', { count: 'exact', head: true });
             if (currentYear) studentQuery = studentQuery.eq('academic_year', currentYear);
-            
             const { count: studentsCount, error: sErr } = await studentQuery;
             if (sErr) throw sErr;
             if (kpiTotalStudents) kpiTotalStudents.textContent = studentsCount || 0;
+        } catch (err) {
+            console.error("Total Students Load Error:", err);
+            if (kpiTotalStudents) kpiTotalStudents.textContent = "Err";
+        }
 
-            // 2. Present Today
+        // 2. Present Today
+        try {
             const d = new Date();
             const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            
             let attendanceQuery = supabase.from('attendance')
                 .select('*', { count: 'exact', head: true })
                 .eq('date', today)
                 .eq('status', 'Present');
-                
-            if (currentYear) attendanceQuery = attendanceQuery.eq('academic_year', currentYear);
             
+            // This might fail if the column 'academic_year' is missing in DB
+            if (currentYear) {
+                attendanceQuery = attendanceQuery.eq('academic_year', currentYear);
+            }
+                
             const { count: presentCount, error: pErr } = await attendanceQuery;
             if (pErr) throw pErr;
             if (kpiPresentToday) kpiPresentToday.textContent = presentCount || 0;
+        } catch (err) {
+            console.error("Present Today Load Error:", err);
+            if (kpiPresentToday) kpiPresentToday.textContent = "Err";
+        }
 
-            // 3. Total Professors
+        // 3. Total Professors
+        try {
             const { count: profsCount, error: profErr } = await supabase
                 .from('professors')
                 .select('*', { count: 'exact', head: true });
-            
             if (profErr) throw profErr;
             if (kpiTotalProfessors) kpiTotalProfessors.textContent = profsCount || 0;
-
         } catch (err) {
-            console.error("Error loading dashboard metrics:", err);
-            if (kpiTotalStudents) kpiTotalStudents.textContent = "Err";
-            if (kpiPresentToday) kpiPresentToday.textContent = "Err";
+            console.error("Total Professors Load Error:", err);
             if (kpiTotalProfessors) kpiTotalProfessors.textContent = "Err";
         }
     }
