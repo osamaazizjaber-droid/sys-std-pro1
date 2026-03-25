@@ -33,7 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'err-invalid-code': 'Invalid Company Code. Access Denied.',
             'flash-in': 'Checked In!',
             'flash-out': 'Checked Out!', 'setup-config': 'Session Configuration', 'prof-id': 'Professor ID', 'prof-name': 'Professor Name', 'college-code': 'College Code', 'grade-stage': 'Grade / Stage', 'subject': 'Subject', 'first-year': 'First Year', 'second-year': 'Second Year', 'third-year': 'Third Year', 'fourth-year': 'Fourth Year', 'back': 'Back', 'next-step': 'Next Step', 'setup-desc-text': 'Configure your scanner session parameters.', 'start-scanning': 'Start Scanning', 'grade': 'Grade', 'student-profile': 'Student Profile', 'student-name': 'Student Name', 'enter-both-ids': 'Please enter both College and Professor IDs.', 'invalid-prof': 'Invalid Professor ID.', 'verifying': 'Verifying...',
-            'attendance-logged': 'Attendance Logged!'
+            'attendance-logged': 'Attendance Logged!',
+            'select-camera': 'Camera Source',
+            'loading-cameras': 'Scanning for cameras...',
+            'no-cameras': 'No cameras found'
         },
         ar: {
             'setup-title': 'إعداد الجهاز',
@@ -59,7 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'err-invalid-code': 'رمز الشركة غير صحيح. تم رفض الوصول.',
             'flash-in': 'تم الدخول!',
             'flash-out': 'تم الخروج الموفق!', 'setup-config': 'إعداد الجلسة', 'prof-id': 'معرف الأستاذ', 'prof-name': 'اسم الأستاذ', 'college-code': 'رمز الكلية', 'grade-stage': 'المرحلة / الصف', 'subject': 'المادة', 'first-year': 'المرحلة الأولى', 'second-year': 'المرحلة الثانية', 'third-year': 'المرحلة الثالثة', 'fourth-year': 'المرحلة الرابعة', 'back': 'رجوع', 'next-step': 'الخطوة التالية', 'setup-desc-text': 'قم بإعداد معلومات جلسة المسح الخاصة بك.', 'start-scanning': 'بدء المسح', 'grade': 'المرحلة', 'student-profile': 'ملف الطالب', 'student-name': 'اسم الطالب', 'enter-both-ids': 'يرجى إدخال رمز الكلية ومعرف الأستاذ.', 'invalid-prof': 'معرف الأستاذ غير صحيح.', 'verifying': 'جاري التحقق...',
-            'attendance-logged': 'تم تسجيل الحضور!'
+            'attendance-logged': 'تم تسجيل الحضور!',
+            'select-camera': 'مصدر الكاميرا',
+            'loading-cameras': 'جاري البحث عن الكاميرات...',
+            'no-cameras': 'لم يتم العثور على كاميرات'
         }
     };
 
@@ -146,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const displaySubject = document.getElementById('display-subject');
     const displayGrade = document.getElementById('display-grade');
+    const cameraSelect = document.getElementById('camera-select');
 
     // --- Setup Flow ---
     btnNextStep.addEventListener('click', async () => {
@@ -194,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (firstAvailable) scanGradeSetup.value = firstAvailable;
 
             updateSubjectDropdown();
+            loadCameras();
 
             setupStep1.classList.add('hidden');
             setupStep2.classList.remove('hidden');
@@ -228,6 +236,34 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.textContent = a.subject_name;
             scanSubjectSetup.appendChild(opt);
         });
+    }
+
+    async function loadCameras() {
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            if (devices && devices.length) {
+                cameraSelect.innerHTML = '';
+                const savedCameraId = localStorage.getItem('scanner_preferred_camera_id');
+                
+                devices.forEach(device => {
+                    const opt = document.createElement('option');
+                    opt.value = device.id;
+                    opt.textContent = device.label || `Camera ${cameraSelect.length + 1}`;
+                    if (device.id === savedCameraId) opt.selected = true;
+                    cameraSelect.appendChild(opt);
+                });
+
+                // Save transition
+                cameraSelect.addEventListener('change', () => {
+                    localStorage.setItem('scanner_preferred_camera_id', cameraSelect.value);
+                });
+            } else {
+                cameraSelect.innerHTML = `<option value="">${TRANSLATIONS[currentLang]['no-cameras']}</option>`;
+            }
+        } catch (err) {
+            console.error("Camera list fail", err);
+            cameraSelect.innerHTML = `<option value="">${TRANSLATIONS[currentLang]['no-cameras']}</option>`;
+        }
     }
 
     btnBackStep.addEventListener('click', () => { setupStep2.classList.add('hidden'); setupStep1.classList.remove('hidden'); });
@@ -282,16 +318,26 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startCamera() {
         if (html5QrCode) return;
         html5QrCode = new Html5Qrcode("reader");
+        const preferredId = localStorage.getItem('scanner_preferred_camera_id');
+        
         try {
-            await html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                onScanSuccess,
-                () => { } // ignore scan failures internally
-            );
+            if (preferredId) {
+                await html5QrCode.start(
+                    preferredId,
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    () => { }
+                );
+            } else {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    () => { }
+                );
+            }
         } catch (err) {
             console.error("Camera fail", err);
-            // Optionally fallback or alert user to grant permissions
         }
     }
 
