@@ -1,5 +1,5 @@
 /**
- * SYS WMS Pro - Authentication Guard
+ * SYS STD Pro - Authentication Guard
  * Protects all routes from unauthorized or unapproved access.
  */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // 4. Attach Company Metadata to Window object for easy access across the app
-        window.WMS_COMPANY_CODE = company.company_code;
+        window.WMS_COLLEGE_CODE = company.company_code;
         window.WMS_COMPANY_ID = session.user.id;
 
     } catch (err) {

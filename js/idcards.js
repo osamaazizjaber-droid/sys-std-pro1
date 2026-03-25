@@ -6,42 +6,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const listContainer = document.getElementById('worker-list-container');
-    const totalCount = document.getElementById('total-worker-count');
-    const searchInput = document.getElementById('search-workers');
-    const selectAllCheckbox = document.getElementById('select-all-workers');
+    const listContainer = document.getElementById('student-list-container');
+    const totalCount = document.getElementById('total-student-count');
+    const searchInput = document.getElementById('search-students');
+    const selectAllCheckbox = document.getElementById('select-all-students');
     const printCountBadge = document.getElementById('print-count-badge');
     
     // Card Elements
     const cardName = document.getElementById('card-name');
-    const cardPosition = document.getElementById('card-position');
-    const cardId = document.getElementById('card-id');
+    const cardGrade = document.getElementById('card-grade');
+    const cardYear = document.getElementById('card-year');
     const cardPhoto = document.getElementById('card-photo');
     const barcodeText = document.getElementById('barcode-text');
     const cardBarcode = document.getElementById('card-barcode');
     
-    let workersData = [];
+    let studentsData = [];
     
-    async function loadWorkers() {
+    async function loadStudents() {
         try {
             const { data, error, count } = await supabase
-                .from('workers')
+                .from('students')
                 .select('*', { count: 'exact' })
-                .order('name', { ascending: true });
+                .neq('status', 'Graduated')
+                .order('student_name', { ascending: true });
                 
             if (error) throw error;
             
-            workersData = data || [];
-            totalCount.textContent = `${count || 0} Total`;
+            studentsData = data || [];
+            const lang = (window.WMSSettings && window.WMSSettings.get('lang')) || 'en'; const totalText = lang === 'ar' ? 'الإجمالي' : 'Total'; totalCount.textContent = `${count || 0} ${totalText}`;
             
-            renderList(workersData);
+            renderList(studentsData);
             
-            // Auto-preview first worker if available
-            if (workersData.length > 0) {
-                updatePreview(workersData[0]);
+            // Auto-preview first student if available
+            if (studentsData.length > 0) {
+                updatePreview(studentsData[0]);
             }
         } catch (err) {
-            console.error("Error loading workers:", err);
+            console.error("Error loading students:", err);
             if (listContainer) {
                 listContainer.innerHTML = `<div class="p-4 text-error text-xs text-left font-bold" style="word-break: break-all;">DEBUG ERROR:<br/>${err.message || JSON.stringify(err)}<br/>${err.stack || ''}</div>`;
             }
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const lang = (window.WMSSettings && typeof window.WMSSettings.get === 'function') ? window.WMSSettings.get('lang') : 'en';
             const i18n = window.WMS_I18N || { en: {}, ar: {} };
             const t = i18n[lang] || i18n['en'] || {};
-            listContainer.innerHTML = `<div class="p-4 text-on-surface-variant text-sm text-center">${t['no-workers-match'] || 'No workers match criteria.'}</div>`;
+            listContainer.innerHTML = `<div class="p-4 text-on-surface-variant text-sm text-center">${t['no-students-match'] || 'No students match criteria.'}</div>`;
             return;
         }
         
@@ -67,18 +68,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Input checkbox
             const relativeDiv = document.createElement('div');
             relativeDiv.className = "relative flex items-center";
-            const currentIdFormat = `W-${w.id.toString().padStart(3, '0')}`;
+            const currentIdFormat = w.student_id;
             
             relativeDiv.innerHTML = `
-                <input class="worker-checkbox peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-outline-variant checked:border-primary checked:bg-primary transition-all" type="checkbox" data-id="${w.id}">
+                <input class="worker-checkbox peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-outline-variant checked:border-primary checked:bg-primary transition-all" type="checkbox" data-id="${w.student_id}">
                 <span class="material-symbols-outlined absolute text-on-primary text-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 pointer-events-none" style="font-variation-settings: 'wght' 600;">check</span>
             `;
             
             const infoDiv = document.createElement('div');
             infoDiv.className = "flex flex-col flex-1 truncate";
             infoDiv.innerHTML = `
-                <span class="text-sm font-semibold text-on-surface truncate group-hover:text-primary transition-colors">${w.name || 'Unknown'}</span>
-                <span class="text-xs text-on-surface-variant font-mono truncate">${currentIdFormat} - ${w.position || 'Worker'}</span>
+                <span class="text-sm font-semibold text-on-surface truncate group-hover:text-primary transition-colors">${w.student_name || 'Unknown'}</span>
+                <span class="text-xs text-on-surface-variant font-mono truncate">${currentIdFormat} - ${w.grade || 'Student'}</span>
             `;
             
             label.appendChild(relativeDiv);
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updatePreview(w);
                 
                 // Highlight selection UI softly
-                document.querySelectorAll('#worker-list-container label').forEach(l => l.classList.remove('bg-surface-container-low', 'border', 'border-surface-container-highest'));
+                document.querySelectorAll('#student-list-container label').forEach(l => l.classList.remove('bg-surface-container-low', 'border', 'border-surface-container-highest'));
                 label.classList.add('bg-surface-container-low', 'border', 'border-surface-container-highest');
             });
             
@@ -110,10 +111,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const i18n = window.WMS_I18N || { en: {}, ar: {} };
         const t = i18n[lang] || i18n['en'] || {};
         
-        cardName.textContent = w.name || t['unknown-user'] || 'Unknown User';
-        if (cardPosition) cardPosition.textContent = w.position || t['industrial-worker'] || 'Industrial Worker';
-        const formattedId = `W-${w.id.toString().padStart(3, '0')}`;
-        if (cardId) cardId.textContent = formattedId;
+        cardName.textContent = w.student_name || t['unknown-user'] || 'Unknown User';
+        if (cardGrade) cardGrade.textContent = w.grade || t['students'] || 'Student';
+        if (cardYear) cardYear.textContent = w.academic_year || '';
+        const formattedId = w.student_id;
         if (barcodeText) barcodeText.textContent = formattedId;
         
         if (w.photo_url) {
@@ -133,10 +134,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
-            const filtered = workersData.filter(w => 
-                (w.name && w.name.toLowerCase().includes(term)) || 
-                w.id.toString().includes(term) ||
-                (w.position && w.position.toLowerCase().includes(term))
+            const filtered = studentsData.filter(w => 
+                (w.student_name && w.student_name.toLowerCase().includes(term)) || 
+                (w.student_id && w.student_id.toString().toLowerCase().includes(term)) ||
+                (w.grade && w.grade.toLowerCase().includes(term))
             );
             renderList(filtered);
             updatePrintCount();
@@ -169,8 +170,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return alert("Please select at least one worker from the list to print.");
             }
             
-            const selectedIds = checkedBoxes.map(cb => parseInt(cb.getAttribute('data-id')));
-            const selectedWorkers = workersData.filter(w => selectedIds.includes(w.id));
+            const selectedIds = checkedBoxes.map(cb => cb.getAttribute('data-id'));
+            const selectedWorkers = studentsData.filter(w => selectedIds.includes(w.student_id));
             
             const cardHeader = document.getElementById('card-header');
             const accentColor = cardHeader ? cardHeader.style.backgroundColor || '#8b5000' : '#8b5000';
@@ -183,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             
             selectedWorkers.forEach(w => {
-                const formattedId = `W-${w.id.toString().padStart(3, '0')}`;
+                const formattedId = w.student_id;
                 const photoSrc = w.photo_url || 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
                 
                 let barcodeSvgString = '';
@@ -198,9 +199,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="print-card" style="page-break-inside: avoid;">
                     <div class="card-header" style="background-color: ${accentColor} !important; border-top-left-radius: 8px; border-top-right-radius: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <div class="logo-container">
-                            <img class="logo" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" alt="Logo">
+                            <img class="logo" src="logo.png" alt="Logo">
                         </div>
-                        <h2 class="app-title">SYS WMS PRO</h2>
+                        <h2 class="app-title">SYS STD PRO</h2>
                         <div class="logo-container">
                             ${window.secondaryLogoDataURL ? `<img class="logo" style="width:100%; height:100%; object-fit:contain;" src="${window.secondaryLogoDataURL}" alt="Secondary Logo">` : `<span style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: ${accentColor};">&#xe85e;</span>`}
                         </div>
@@ -212,8 +213,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                         
                         <div class="data-side">
-                            <h4 class="worker-name">${w.name || 'Unknown'}</h4>
-                            <p class="worker-position">${w.position || 'Worker'}</p>
+                            <h4 class="worker-name">${w.student_name || 'Unknown'}</h4>
+                            <p class="worker-grade">${w.grade || 'Student'}</p>
+                            <p class="worker-grade" style="font-size:11px; color:#94a3b8; letter-spacing:0.1em; margin-top:2px;">${w.academic_year || ''}</p>
                             
                             ${showBarcode ? `
                             <div class="barcode-section">
@@ -230,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             printWindow.document.write(`
                 <html>
                 <head>
-                    <title>Print ID Cards - SYS WMS Pro</title>
+                    <title>Print ID Cards - SYS STD Pro</title>
                     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Cairo:wght@400;700;800&family=Tajawal:wght@400;700;800&family=Almarai:wght@400;700;800&family=Changa:wght@400;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
                     <style>
                         @page {
@@ -354,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             text-overflow: ellipsis;
                             letter-spacing: -0.02em;
                         }
-                        .worker-position {
+                        .worker-grade {
                             font-size: 15px;
                             font-weight: 800;
                             color: #64748b;
@@ -422,9 +424,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cardEl) {
                 cardEl.style.fontFamily = e.target.value;
                 const nameEl = document.getElementById('card-name');
-                const posEl = document.getElementById('card-position');
+                const gradeEl = document.getElementById('card-grade');
                 if (nameEl) nameEl.style.fontFamily = e.target.value;
-                if (posEl) posEl.style.fontFamily = e.target.value;
+                if (gradeEl) gradeEl.style.fontFamily = e.target.value;
             }
         });
         
@@ -433,14 +435,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardEl && fontSelector.value) {
             cardEl.style.fontFamily = fontSelector.value;
             const nameEl = document.getElementById('card-name');
-            const posEl = document.getElementById('card-position');
+            const gradeEl = document.getElementById('card-grade');
             if (nameEl) nameEl.style.fontFamily = fontSelector.value;
-            if (posEl) posEl.style.fontFamily = fontSelector.value;
+            if (gradeEl) gradeEl.style.fontFamily = fontSelector.value;
         }
     }
 
     // Init Page
-    loadWorkers();
+    loadStudents();
 });
 
 

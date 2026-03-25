@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Assignments - SYS STD Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="css/themes.css"/>
+    <script src="js/settings.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f49000",
+                        "surface": "#f8f9fa",
+                        "on-surface": "#191c1d"
+                    },
+                    fontFamily: {
+                        "body": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="icon" type="image/png" href="favicon.png?v=7" />
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-surface text-on-surface antialiased font-body min-h-screen flex flex-col">
+    <header class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-surface-container-highest z-50">
+        <div class="flex items-center gap-4">
+            <img alt="Logo" class="h-10 w-auto" src="logo.png" />
+            <span class="text-xl font-black text-primary hidden sm:inline-block tracking-tight">SYS STD Pro</span>
+        </div>
+        <nav class="flex items-center gap-6">
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+            <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
+            <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
+            <div data-wms-settings-wrapper style="position:relative;">
+                <a href="settings.html" class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" data-i18n="settings">Settings</a>
+            </div>
+        </nav>
+        <div class="flex items-center gap-2">
+            <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
+            </button>
+            <button id="hdr-dark-btn" title="Toggle Dark Mode" class="w-9 h-9 rounded-full flex items-center justify-center border border-outline-variant/30 text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors">
+                <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 p-8 max-w-6xl mx-auto w-full">
+        <div class="flex flex-col gap-8">
+                <div class="flex flex-wrap gap-4 justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight" data-i18n="assignments">Subject Assignments</h2>
+                        <p class="text-slate-500" data-i18n="assignments-desc">Define subjects per stage and assign professors to them.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <button id="btn-import-csv" class="flex cursor-pointer items-center justify-center rounded-xl h-10 px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition-all shadow-sm text-sm font-bold gap-2 group">
+                                <span class="material-symbols-outlined text-[18px] text-primary transition-transform group-hover:-translate-y-0.5">upload_file</span>
+                                <span data-i18n="import-csv">Import CSV</span>
+                            </button>
+                            <input type="file" id="import-csv-file" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Assignment Form -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <form id="assignment-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="assign-stage">Stage / Grade</label>
+                        <select id="assign-stage" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-1 focus:ring-primary h-[40px]">
+                            <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                            <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                            <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                            <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                            <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                            <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                            <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                            <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="assign-subject">Subject Name</label>
+                        <input type="text" id="assign-subject" required list="subject-suggestions" placeholder="e.g. Mathematics" data-i18n-placeholder="assign-subject" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-1 focus:ring-primary h-[40px]">
+                        <datalist id="subject-suggestions"></datalist>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="assign-prof">Assign Professor</label>
+                        <select id="assign-prof" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-1 focus:ring-primary h-[40px]">
+                            <option value="" data-i18n="select-prof">Select Professor...</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="btn-save-assignment" class="bg-primary text-white h-[40px] px-6 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base">link</span>
+                        <span data-i18n="create-assignment">Create Assignment</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Assignments Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 text-[10px] uppercase font-black text-slate-400" data-i18n="grade">Stage</th>
+                            <th class="px-6 py-3 text-[10px] uppercase font-black text-slate-400" data-i18n="subject">Subject</th>
+                            <th class="px-6 py-3 text-[10px] uppercase font-black text-slate-400" data-i18n="prof-name">Professor</th>
+                            <th class="px-6 py-3 text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignments-tbody" class="divide-y divide-slate-100">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/guard.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/assignments.js"></script>
+</body>
+</html>

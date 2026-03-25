@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>SYS WMS Pro</title>
+    <title>SYS STD Pro</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
@@ -117,18 +117,19 @@
                 class="w-full bg-white border-b border-surface-variant px-6 py-3 mx-auto flex justify-between items-center sticky top-0 z-50 shadow-sm">
                 <div class="flex items-center gap-3 text-on-surface">
                     <div class="h-16 w-auto flex items-center">
-                        <img alt="SYS WMS Pro Logo" class="h-full object-contain scale-[1.3] origin-left"
-                            src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png"
+                        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain"
+                            src="logo.png"
                             onerror="this.style.display='none';" />
                     </div>
-                    <h2 class="text-xl font-black tracking-tighter text-slate-900">SYS WMS Pro</h2>
+                    <h2 class="text-xl font-black tracking-tighter text-primary">SYS STD Pro</h2>
                 </div>
                 <nav class="flex items-center gap-6">
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                    <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="workers.html" data-i18n="workers">Workers Management</a>
+                    <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="advances.html" data-i18n="advances">Cash Advances</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
                     <div data-wms-settings-wrapper style="position:relative;">
                       <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
@@ -149,10 +150,10 @@
             <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
                 <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0">
                     <div class="flex items-center gap-4">
-                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="workers-mgmt">Workers Management</h2>
+                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="students-mgmt">Student Management</h2>
                         <div class="bg-orange-100 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] border border-orange-200/60">
                             <span class="material-symbols-outlined text-[16px]">groups</span>
-                            <span id="kpi-total-workers">...</span> <span data-i18n="workers">Workers</span>
+                            <span id="kpi-total-students">...</span> <span data-i18n="students">Students</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -184,9 +185,9 @@
                                         class="flex flex-col items-center pointer-events-none">
                                         <span class="material-symbols-outlined text-2xl mb-0.5">add_a_photo</span>
                                     </div>
-                                    <img id="worker-photo-preview"
+                                    <img id="student-photo-preview"
                                         class="absolute inset-0 w-full h-full object-cover hidden" />
-                                    <input id="worker-photo-input"
+                                    <input id="student-photo-input"
                                         class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" type="file"
                                         accept="image/*" />
                                 </div>
@@ -201,26 +202,51 @@
                             <div class="flex justify-between items-center">
                                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-primary text-[18px]">person_add</span>
-                                    <span data-i18n="add-worker">New Worker Onboarding</span>
+                                    <span data-i18n="add-student">New Student Onboarding</span>
                                 </h3>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 w-full">
-                                <input id="worker-name"
-                                    class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary sm:col-span-2 w-full"
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                                <input id="student-name"
+                                    class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary w-full"
                                     placeholder="Full Legal Name" data-i18n-placeholder="full-name" type="text" />
 
-                                <input id="worker-position"
-                                    class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary sm:col-span-1 w-full"
-                                    placeholder="Position / Role" data-i18n-placeholder="position" type="text" />
+                                <select id="student-grade" class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary w-full cursor-pointer">
+                                    <option value="" disabled selected data-i18n-placeholder="grade">Grade / Stage</option>
+                                    <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                                    <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                                    <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                                    <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                                    <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                                    <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                                    <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                                    <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                                </select>
 
-                                <input id="worker-salary"
-                                    class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary sm:col-span-1 w-full"
-                                    placeholder="Daily Salary (IQD)" data-i18n-placeholder="daily-salary" type="number" />
+                                <select id="student-academic-year"
+                                    class="bg-white border-slate-200 py-1.5 px-3 rounded-lg text-sm focus:ring-primary focus:border-primary w-full cursor-pointer">
+                                    <option value="" disabled selected data-i18n-placeholder="academic-year">Academic Year</option>
+                                </select>
                             </div>
                         </div>
                         <div class="flex-shrink-0 w-full md:w-auto self-end mt-2 md:mt-0">
-                            <button id="btn-submit-worker"
+                            <button id="btn-submit-student"
                                 class="w-full md:w-auto bg-primary text-white h-[34px] px-6 rounded-lg font-bold text-sm shadow-sm hover:shadow-md hover:bg-orange-600 transition-all" data-i18n="submit">Submit</button>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Progression Action Bar -->
+                    <div id="bulk-action-bar" class="hidden bg-white border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between shadow-sm shadow-primary/5 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold" id="bulk-selected-count">1 Selected</span>
+                            <span class="text-sm font-bold text-slate-700 hidden sm:block">Action:</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="target-academic-year" class="text-xs rounded border-slate-200 px-2 py-1.5 w-24 sm:w-32 focus:ring-primary focus:border-primary cursor-pointer">
+                                <option value="" disabled selected data-i18n-placeholder="academic-year">Target Year</option>
+                            </select>
+                            <button id="btn-bulk-promote" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded font-bold text-[10px] sm:text-xs transition-colors border border-emerald-200 uppercase tracking-wider">Promote</button>
+                            <button id="btn-bulk-retain" class="bg-orange-50 text-orange-600 hover:bg-orange-100 px-3 py-1.5 rounded font-bold text-[10px] sm:text-xs transition-colors border border-orange-200 uppercase tracking-wider">Fail</button>
+                            <button id="btn-bulk-graduate" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded font-bold text-[10px] sm:text-xs transition-colors border border-blue-200 uppercase tracking-wider">Graduate</button>
                         </div>
                     </div>
 
@@ -230,25 +256,25 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50/50">
+                                        <th class="px-6 py-4 border-b border-slate-100 w-12">
+                                            <input type="checkbox" id="selectAllStudents" class="rounded border-slate-300 text-primary focus:ring-primary">
+                                        </th>
                                         <th
-                                            class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="worker-id">
-                                            Worker ID</th>
+                                            class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="student-id">
+                                            Student ID</th>
                                         <th
                                             class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="photo-name">
                                             Photo & Name</th>
                                         <th
                                             class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="position">
-                                            Position</th>
-                                        <th
-                                            class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100 text-right" data-i18n="daily-salary">
-                                            Daily Salary (IQD)</th>
+                                            Grade & Year</th>
                                         <th
                                             class="px-6 py-4 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100 text-right" data-i18n="actions">
                                             Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="workers-tbody" class="divide-y divide-slate-100">
-                                    <!-- Dynamic Rows Populated By workers.js -->
+                                <tbody id="students-tbody" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows Populated By students.js -->
                                 </tbody>
                             </table>
                         </div>
@@ -261,16 +287,16 @@
     </div>
 
     <!-- Edit Worker Modal -->
-    <div id="edit-worker-modal"
+    <div id="edit-student-modal"
         class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[100] transition-all">
         <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-900">Edit Worker Profile</h3>
+                <h3 class="text-lg font-bold text-slate-900">Edit Student Profile</h3>
                 <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 transition-colors"><span
                         class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-6 space-y-4">
-                <input type="hidden" id="edit-worker-id">
+                <input type="hidden" id="edit-student-id">
 
                 <div class="flex items-center gap-4 mb-4">
                     <div
@@ -290,23 +316,30 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
-                        <input id="edit-worker-name"
+                        <input id="edit-student-name"
                             class="w-full bg-white border-slate-200 p-2 rounded-lg text-sm focus:ring-primary focus:border-primary"
                             type="text" />
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Position</label>
-                            <input id="edit-worker-position"
-                                class="w-full bg-white border-slate-200 p-2 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                                type="text" />
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Grade</label>
+                            <select id="edit-student-grade" class="w-full bg-white border-slate-200 p-2 rounded-lg text-sm focus:ring-primary focus:border-primary cursor-pointer">
+                                <option value="" disabled>Select Grade / Stage</option>
+                                <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                                <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                                <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                                <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                                <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                                <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                                <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                                <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Daily Salary
-                                (IQD)</label>
-                            <input id="edit-worker-salary"
-                                class="w-full bg-white border-slate-200 p-2 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                                type="number" />
+                            <select id="edit-student-academic-year"
+                                class="w-full bg-white border-slate-200 p-2 rounded-lg text-sm focus:ring-primary focus:border-primary cursor-pointer">
+                                <option value="" disabled selected>Academic Year</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -326,7 +359,7 @@
     <script src="js/config.js"></script>
     <script src="js/guard.js"></script>
     <script src="js/settings.js"></script>
-    <script src="js/workers.js"></script>
+    <script src="js/students.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
       const S = window.WMSSettings;

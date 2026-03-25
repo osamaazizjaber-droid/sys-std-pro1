@@ -2,8 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const supabase = window.sbClient;
-    if(!supabase) {
-        console.error("Supabase not linked."); 
+    if (!supabase) {
+        console.error("Supabase not linked.");
         return;
     }
 
@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'err-failed': 'Failed to log attendance.',
             'err-invalid-code': 'Invalid Company Code. Access Denied.',
             'flash-in': 'Checked In!',
-            'flash-out': 'Checked Out!'
+            'flash-out': 'Checked Out!', 'setup-config': 'Session Configuration', 'prof-id': 'Professor ID', 'prof-name': 'Professor Name', 'college-code': 'College Code', 'grade-stage': 'Grade / Stage', 'subject': 'Subject', 'first-year': 'First Year', 'second-year': 'Second Year', 'third-year': 'Third Year', 'fourth-year': 'Fourth Year', 'back': 'Back', 'next-step': 'Next Step', 'setup-desc-text': 'Configure your scanner session parameters.', 'start-scanning': 'Start Scanning', 'grade': 'Grade', 'student-profile': 'Student Profile', 'student-name': 'Student Name', 'enter-both-ids': 'Please enter both College and Professor IDs.', 'invalid-prof': 'Invalid Professor ID.', 'verifying': 'Verifying...',
+            'attendance-logged': 'Attendance Logged!'
         },
         ar: {
             'setup-title': 'إعداد الجهاز',
@@ -57,156 +58,212 @@ document.addEventListener('DOMContentLoaded', () => {
             'err-failed': 'فشل تسجيل الحضور.',
             'err-invalid-code': 'رمز الشركة غير صحيح. تم رفض الوصول.',
             'flash-in': 'تم الدخول!',
-            'flash-out': 'تم الخروج الموفق!'
+            'flash-out': 'تم الخروج الموفق!', 'setup-config': 'إعداد الجلسة', 'prof-id': 'معرف الأستاذ', 'prof-name': 'اسم الأستاذ', 'college-code': 'رمز الكلية', 'grade-stage': 'المرحلة / الصف', 'subject': 'المادة', 'first-year': 'المرحلة الأولى', 'second-year': 'المرحلة الثانية', 'third-year': 'المرحلة الثالثة', 'fourth-year': 'المرحلة الرابعة', 'back': 'رجوع', 'next-step': 'الخطوة التالية', 'setup-desc-text': 'قم بإعداد معلومات جلسة المسح الخاصة بك.', 'start-scanning': 'بدء المسح', 'grade': 'المرحلة', 'student-profile': 'ملف الطالب', 'student-name': 'اسم الطالب', 'enter-both-ids': 'يرجى إدخال رمز الكلية ومعرف الأستاذ.', 'invalid-prof': 'معرف الأستاذ غير صحيح.', 'verifying': 'جاري التحقق...',
+            'attendance-logged': 'تم تسجيل الحضور!'
         }
     };
 
     let currentLang = localStorage.getItem('wms_scanner_lang') || 'en';
-    
+
     function applyLang() {
         const dict = TRANSLATIONS[currentLang];
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if(dict[key]) el.textContent = dict[key];
+            if (dict[key]) el.textContent = dict[key];
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (dict[key]) el.placeholder = dict[key];
         });
         document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = currentLang;
         document.getElementById('lang-btn').textContent = currentLang === 'ar' ? 'EN' : 'ع';
     }
-    
+
     document.getElementById('lang-btn').addEventListener('click', () => {
         currentLang = currentLang === 'en' ? 'ar' : 'en';
         localStorage.setItem('wms_scanner_lang', currentLang);
         applyLang();
     });
-    
+
     applyLang();
 
     // --- Dynamic Error Translation ---
     function translateError(msg) {
         if (currentLang !== 'ar') return msg;
         if (!msg) return TRANSLATIONS['ar']['err-failed'];
-        
+
         if (msg.includes('Invalid Company Code')) return 'رمز الشركة غير صحيح';
         if (msg.includes('Worker not found')) return 'العامل غير موجود أو غير مسجل في هذه الشركة';
         if (msg.includes('has no active shift today')) return 'لا يمكن تسجيل الخروج: العامل ليس لديه حضور مسجل اليوم';
         if (msg.includes('has already checked out today')) return 'تم تسجيل خروج هذا العامل مسبقاً اليوم';
         if (msg.includes('is already checked in today')) return 'هذا العامل مسجل حضوره مسبقاً اليوم';
         if (msg.includes('Invalid action mode')) return 'وضع المسح غير صحيح';
-        
+
         return msg;
     }
 
     // --- Screens & UI Elements ---
     const screenLogin = document.getElementById('login-screen');
     const screenScanner = document.getElementById('scanner-interface');
-    
-    const loginCode = document.getElementById('login-code');
-    const loginSubmit = document.getElementById('login-submit');
-    const companyBadge = document.getElementById('company-badge');
-    const companyCodeDisplay = document.getElementById('company-code-display');
-    const logoutBtn = document.getElementById('logout-btn');
 
-    const btnModeIn = document.getElementById('mode-in');
-    const btnModeOut = document.getElementById('mode-out');
+    let currentCompanyCode = '';
+    let currentProfId = '';
+    let currentProfName = '';
+    let profAssignments = [];
+    let currentSubject = '';
+    let currentGrade = '';
+    let currentScanId = '';
+    let isProcessing = false;
+    let html5QrCode = null;
 
-    const resultOverlay = document.getElementById('result-overlay');
-    const resWorkerName = document.getElementById('res-worker-name');
-    const resWorkerId = document.getElementById('res-worker-id');
-    const otContainer = document.getElementById('ot-container');
-    const resOt = document.getElementById('res-ot');
+    const resStudentName = document.getElementById('res-student-name');
+    const resStudentId = document.getElementById('res-student-id');
+    const resMessage = document.getElementById('res-message');
     const btnCancel = document.getElementById('btn-cancel');
     const btnConfirm = document.getElementById('btn-confirm');
     const btnConfirmText = document.getElementById('btn-confirm-text');
-    const resMessage = document.getElementById('res-message');
+    const resultOverlay = document.getElementById('result-overlay');
     const scanBrackets = document.getElementById('scan-brackets');
-    
     const successFlash = document.getElementById('success-flash');
     const successFlashTitle = document.getElementById('success-flash-title');
     const successFlashName = document.getElementById('success-flash-name');
 
-    // Overtime Adjusters
-    document.getElementById('ot-plus').addEventListener('click', () => {
-        resOt.value = parseFloat(resOt.value) + 0.5;
-    });
-    document.getElementById('ot-minus').addEventListener('click', () => {
-        if(parseFloat(resOt.value) >= 0.5) resOt.value = parseFloat(resOt.value) - 0.5;
-    });
+    const loginCode = document.getElementById('login-code');
+    const profIdInput = document.getElementById('prof-id');
+    const btnNextStep = document.getElementById('btn-next-step');
+    const setupStep1 = document.getElementById('setup-step-1');
+    const setupStep2 = document.getElementById('setup-step-2');
+    const step1Error = document.getElementById('step-1-error');
+    const displayProfName = document.getElementById('display-prof-name');
+    const scanGradeSetup = document.getElementById('scan-grade');
+    const scanSubjectSetup = document.getElementById('scan-subject-setup');
+    const btnBackStep = document.getElementById('btn-back-step');
+    const btnBackStepMobile = document.getElementById('btn-back-step-mobile');
+    const loginSubmit = document.getElementById('login-submit');
+    const companyBadge = document.getElementById('company-badge');
+    const companyCodeDisplay = document.getElementById('company-code-display');
+    const logoutBtn = document.getElementById('logout-btn');
+    const displaySubject = document.getElementById('display-subject');
+    const displayGrade = document.getElementById('display-grade');
 
-    let currentCompanyCode = localStorage.getItem('wms_scanner_company');
-    if (currentCompanyCode) currentCompanyCode = currentCompanyCode.toUpperCase();
-    
-    let currentMode = 'in'; // 'in' or 'out' default
-    let currentScanId = null;
-    let html5QrCode = null;
-    let isProcessing = false;
-
-    // --- Initialization ---
-    if (currentCompanyCode) {
-        activateScannerMode();
-    } else {
-        screenLogin.classList.remove('translate-y-full');
-    }
-
-    loginSubmit.addEventListener('click', async () => {
+    // --- Setup Flow ---
+    btnNextStep.addEventListener('click', async () => {
         const code = loginCode.value.trim().toUpperCase();
-        if(!code) { alert(TRANSLATIONS[currentLang]['err-empty-code']); return; }
-        
-        // Disable UI and show loading state
-        loginSubmit.disabled = true;
-        loginSubmit.innerHTML = `<span class="material-symbols-outlined animate-spin text-[18px]">sync</span>`;
-        
+        let pId = profIdInput.value.trim().toUpperCase(); // Ensure uppercase for matching
+
+        if (!code || !pId) {
+            step1Error.textContent = TRANSLATIONS[currentLang]['enter-both-ids'];
+            step1Error.classList.remove('hidden');
+            return;
+        }
+
+        step1Error.classList.add('hidden');
+        btnNextStep.disabled = true;
+        btnNextStep.innerHTML = `<span class="material-symbols-outlined animate-spin text-base">sync</span> ${TRANSLATIONS[currentLang]['verifying']}`;
+
         try {
-            // Verify code securely against the database before allowing camera access
-            const { data, error } = await window.sbClient.rpc('verify_scanner_code', { p_company_code: code });
-            
-            if (error) throw error;
-            
-            if (data && data.valid) {
-                currentCompanyCode = code;
-                localStorage.setItem('wms_scanner_company', code);
-                activateScannerMode();
-            } else {
-                alert(TRANSLATIONS[currentLang]['err-invalid-code'] || 'Invalid Company Code. Access Denied.');
-                loginCode.value = '';
-                loginCode.focus();
+            // 1. Verify Professor (using ilike for case-insensitivity)
+            const { data: prof, error: profErr } = await supabase.from('professors').select('prof_name').ilike('prof_id', pId).single();
+            if (profErr || !prof) throw new Error(TRANSLATIONS[currentLang]['invalid-prof']);
+
+            currentProfName = prof.prof_name;
+            currentProfId = pId;
+            currentCompanyCode = code;
+
+            // 2. Load Assignments (using ilike for case-insensitivity)
+            const { data: assignments, error: assErr } = await supabase.from('subject_assignments').select('*').ilike('prof_id', pId);
+            if (assErr) throw assErr;
+
+            profAssignments = assignments || [];
+
+            if (profAssignments.length === 0) {
+                step1Error.textContent = currentLang === 'ar' ? "لم يتم العثور على مواد مسندة لهذا الأستاذ" : "No subjects assigned to this professor.";
+                step1Error.classList.remove('hidden');
+                return;
             }
+
+            // Persistence
+            localStorage.setItem('scanner_college_code', code);
+            localStorage.setItem('scanner_prof_id', pId);
+
+            displayProfName.textContent = currentProfName;
+
+            // Auto-select first available stage that has assignments
+            const firstAvailable = profAssignments[0]?.stage_name;
+            if (firstAvailable) scanGradeSetup.value = firstAvailable;
+
+            updateSubjectDropdown();
+
+            setupStep1.classList.add('hidden');
+            setupStep2.classList.remove('hidden');
         } catch (err) {
-            console.error("Scanner Auth Error:", err);
-            alert("Connection error verifying code.");
+            step1Error.textContent = translateError(err.message);
+            step1Error.classList.remove('hidden');
         } finally {
-            // Restore UI
-            loginSubmit.disabled = false;
-            loginSubmit.innerHTML = `<span data-i18n="authenticate">${TRANSLATIONS[currentLang]['authenticate']}</span> <span class="material-symbols-outlined text-[18px]">arrow_forward</span>`;
+            btnNextStep.disabled = false;
+            btnNextStep.innerHTML = `${TRANSLATIONS[currentLang]['next-step']} <span class="material-symbols-outlined text-[18px]">arrow_forward</span>`;
         }
     });
 
-    logoutBtn.addEventListener('click', () => {
-        if(confirm(TRANSLATIONS[currentLang]['alert-logout'])) {
-            localStorage.removeItem('wms_scanner_company');
-            currentCompanyCode = null;
-            companyBadge.classList.add('hidden');
-            companyBadge.classList.remove('flex');
-            loginCode.value = '';
-            stopCamera();
-            screenLogin.classList.remove('-translate-y-full');
-            screenScanner.classList.add('hidden');
-        }
-    });
-
-    // --- Mode Selection ---
-    function setModeUI() {
-        if(currentMode === 'in') {
-            btnModeIn.className = 'flex-1 py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-1.5 bg-emerald-500 text-white shadow-md active-mode';
-            btnModeOut.className = 'flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 text-white/70 hover:text-white backdrop-blur-sm';
-        } else {
-            btnModeOut.className = 'flex-1 py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-1.5 bg-rose-500 text-white shadow-md active-mode';
-            btnModeIn.className = 'flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 text-white/70 hover:text-white backdrop-blur-sm';
-        }
+    // --- Persistent Login Initialization ---
+    const savedCode = localStorage.getItem('scanner_college_code');
+    const savedProf = localStorage.getItem('scanner_prof_id');
+    if (savedCode && savedProf) {
+        loginCode.value = savedCode;
+        profIdInput.value = savedProf;
+        setTimeout(() => btnNextStep.click(), 500);
     }
 
-    btnModeIn.addEventListener('click', () => { if(isProcessing) return; currentMode = 'in'; setModeUI(); hideResult(); });
-    btnModeOut.addEventListener('click', () => { if(isProcessing) return; currentMode = 'out'; setModeUI(); hideResult(); });
+    scanGradeSetup.addEventListener('change', updateSubjectDropdown);
+
+    function updateSubjectDropdown() {
+        const grade = scanGradeSetup.value;
+        const filtered = profAssignments.filter(a => a.stage_name === grade);
+
+        scanSubjectSetup.innerHTML = filtered.length ? '' : `<option value="">-- No Subjects --</option>`;
+        filtered.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.subject_name;
+            opt.textContent = a.subject_name;
+            scanSubjectSetup.appendChild(opt);
+        });
+    }
+
+    btnBackStep.addEventListener('click', () => { setupStep2.classList.add('hidden'); setupStep1.classList.remove('hidden'); });
+    btnBackStepMobile.addEventListener('click', () => { setupStep2.classList.add('hidden'); setupStep1.classList.remove('hidden'); });
+
+    loginSubmit.addEventListener('click', () => {
+        currentSubject = scanSubjectSetup.value;
+        currentGrade = scanGradeSetup.value;
+
+        if (!currentSubject) {
+            alert(currentLang === 'ar' ? "يرجى اختيار المادة أولاً" : "Please select a subject first.");
+            return;
+        }
+
+        displaySubject.textContent = currentSubject;
+        displayGrade.textContent = currentGrade;
+        activateScannerMode();
+    });
+
+
+
+
+    function setModeUI() {
+        // Simple UI setup for the confirm button
+        btnConfirm.className = 'flex-[2] py-4 bg-slate-200 text-slate-400 font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed pointer-events-none';
+        btnConfirmText.textContent = TRANSLATIONS[currentLang]['authenticate'] || 'Wait...';
+    }
+
+    logoutBtn?.addEventListener('click', () => {
+        if (confirm(TRANSLATIONS[currentLang]['alert-logout'])) {
+            localStorage.removeItem('scanner_college_code');
+            localStorage.removeItem('scanner_prof_id');
+            stopCamera();
+            location.reload();
+        }
+    });
 
     // --- Scanner Logic ---
     function activateScannerMode() {
@@ -230,26 +287,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 onScanSuccess,
-                () => {} // ignore scan failures internally
+                () => { } // ignore scan failures internally
             );
-        } catch(err) {
+        } catch (err) {
             console.error("Camera fail", err);
             // Optionally fallback or alert user to grant permissions
         }
     }
 
     function stopCamera() {
-        if(html5QrCode) {
-            html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(e=>console.error(e));
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(e => console.error(e));
         }
     }
 
     function onScanSuccess(decodedText) {
         if (isProcessing) return;
         isProcessing = true;
-        
+
         scanBrackets.classList.add('scanning'); // Animates the reticle to green
-        
+
         // Pause underlying scanner processing
         if (html5QrCode) html5QrCode.pause();
         processScannedBarcode(decodedText);
@@ -258,25 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Processing ---
     function processScannedBarcode(barcode) {
         currentScanId = barcode;
-        resWorkerId.textContent = barcode;
-        resWorkerName.textContent = TRANSLATIONS[currentLang]['msg-locating'];
+        resStudentId.textContent = barcode;
+        resStudentName.textContent = TRANSLATIONS[currentLang]['msg-locating'];
         resMessage.classList.add('hidden');
-        
-        // Setup Result Overlay UI
-        if(currentMode === 'in') {
-            otContainer.classList.add('hidden');
-            btnConfirm.className = 'flex-[2] py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto';
-            btnConfirmText.textContent = TRANSLATIONS[currentLang]['btn-confirm-in'];
-        } else {
-            otContainer.classList.remove('hidden');
-            resOt.value = 0;
-            btnConfirm.className = 'flex-[2] py-4 bg-rose-500 hover:bg-rose-600 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto';
-            btnConfirmText.textContent = TRANSLATIONS[currentLang]['btn-confirm-out'];
-        }
+
+        btnConfirm.className = 'flex-[2] py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto';
+        btnConfirmText.textContent = TRANSLATIONS[currentLang]['btn-confirm-in'] || 'Confirm Logic';
 
         btnConfirm.disabled = true;
         showResult();
-        verifyWorker(barcode);
+        verifyStudent(barcode);
     }
 
     function showResult() {
@@ -289,34 +337,26 @@ document.addEventListener('DOMContentLoaded', () => {
         isProcessing = false;
         try {
             if (html5QrCode) html5QrCode.resume();
-        } catch(err) {
+        } catch (err) {
             // Ignore resume errors if already running
         }
     }
 
-    async function verifyWorker(barcode) {
+    async function verifyStudent(barcode) {
         try {
-            const { data, error } = await supabase.rpc('get_scanner_worker_info', {
-                p_company_code: currentCompanyCode,
-                p_worker_barcode: barcode
+            const { data, error } = await supabase.rpc('get_scanner_student_info', {
+                p_college_code: currentCompanyCode,
+                p_student_id: barcode
             });
-            if (error) throw error; // Will be caught
-            
-            resWorkerName.textContent = data;
-            btnConfirm.disabled = false;
-            
-            // AUTO-CONFIRM MAGIC for Check-In
-            if(currentMode === 'in') {
-                 // Automatically submit the check-in to save time
-                 btnConfirm.click();
-            }
+            if (error) throw error;
 
-        } catch(err) {
+            resStudentName.textContent = data;
+            btnConfirm.disabled = false;
+        } catch (err) {
             console.error(err);
-            resWorkerName.textContent = TRANSLATIONS[currentLang]['msg-unknown'];
+            resStudentName.textContent = TRANSLATIONS[currentLang]['msg-unknown'];
             resMessage.textContent = translateError(err.message) + ` (C: [${currentCompanyCode}] B: [${barcode}])`;
             resMessage.classList.remove('hidden');
-            // User must click Rescan
         }
     }
 
@@ -325,38 +365,32 @@ document.addEventListener('DOMContentLoaded', () => {
     btnConfirm.addEventListener('click', async () => {
         btnConfirm.disabled = true;
         btnConfirmText.textContent = TRANSLATIONS[currentLang]['msg-saving'];
-        
+
         try {
-            const otValue = parseFloat(resOt.value) || 0;
             const { data, error } = await supabase.rpc('log_scanner_attendance', {
-                p_company_code: currentCompanyCode,
-                p_action_mode: currentMode,
-                p_worker_barcode: currentScanId,
-                p_overtime: otValue
+                p_college_code: currentCompanyCode,
+                p_action_mode: 'none', // Dummy arg
+                p_student_id: currentScanId,
+                p_prof_id: currentProfId || null,
+                p_subject: currentSubject
             });
-            
+
             if (error) throw error;
-            
-            // Show massive success flash!
+
             hideResult();
-            
-            successFlashTitle.textContent = currentMode === 'in' ? TRANSLATIONS[currentLang]['flash-in'] : TRANSLATIONS[currentLang]['flash-out'];
-            successFlashName.textContent = resWorkerName.textContent;
+
+            successFlashTitle.textContent = TRANSLATIONS[currentLang]['attendance-logged'] || "Attendance Logged!";
+            successFlashName.textContent = resStudentName.textContent;
             successFlash.classList.remove('opacity-0', 'pointer-events-none', 'scale-110');
             successFlash.classList.add('opacity-100', 'scale-100');
-            if(currentMode === 'out') {
-                successFlash.classList.replace('bg-emerald-500', 'bg-rose-500');
-            } else {
-                successFlash.classList.replace('bg-rose-500', 'bg-emerald-500');
-            }
+            successFlash.classList.replace('bg-rose-500', 'bg-emerald-500');
 
-            // Hide success flash after 1.5 seconds and resume scanning
             setTimeout(() => {
                 successFlash.classList.remove('opacity-100', 'scale-100');
                 successFlash.classList.add('opacity-0', 'pointer-events-none', 'scale-110');
             }, 1500);
 
-        } catch(err) {
+        } catch (err) {
             console.error(err);
             resMessage.textContent = translateError(err.message) || TRANSLATIONS[currentLang]['err-failed'];
             resMessage.classList.remove('hidden');
@@ -364,4 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btnConfirm.disabled = false;
         }
     });
+
+    // Add translation hook for the dynamically set "Attendance Logged!" text
+    // The text on successFlashTitle was replaced by translation
+
 });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>SYS WMS Pro</title>
+    <title>SYS STD Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -61,16 +61,17 @@
             <header class="w-full bg-white border-b border-surface-variant px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
                 <div class="flex items-center gap-3 text-on-surface">
                     <div class="h-16 w-auto flex items-center">
-                        <img alt="SYS WMS Pro Logo" class="h-full object-contain scale-[1.3] origin-left" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" />
+                        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain" src="logo.png" />
                     </div>
-                    <h2 class="text-xl font-black tracking-tighter text-slate-900">SYS WMS Pro</h2>
+                    <h2 class="text-xl font-black tracking-tighter text-primary">SYS STD Pro</h2>
                 </div>
                 <nav class="flex items-center gap-6">
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="workers.html" data-i18n="workers">Workers Management</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
                     <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="advances.html" data-i18n="advances">Cash Advances</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
                     <div data-wms-settings-wrapper style="position:relative;">
                       <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
@@ -93,7 +94,7 @@
                 <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0">
                     <div>
                         <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="attendance-title">Live Attendance Terminal</h2>
-                        <p class="text-sm text-on-surface-variant mt-1" data-i18n="attendance-sub">Scan worker ID badges to log daily shifts.</p>
+                        <p class="text-sm text-on-surface-variant mt-1" data-i18n="attendance-sub">Scan student ID badges to log daily shifts.</p>
                     </div>
                     
                     <div class="flex items-center gap-4 w-full md:w-auto p-2 rounded-xl">
@@ -103,6 +104,41 @@
                             <input type="date" id="attendance-date" class="pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none transition-all">
                         </div>
                         
+                        
+                        
+                        <!-- Grade Filter -->
+                        <div class="relative w-36">
+                            <select id="attendance-grade" class="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all appearance-none cursor-pointer">
+                                <option value="ALL" data-i18n="all-grades">All Grades</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                        </div>
+                        <!-- Professor Selector -->
+                        <div class="relative w-40">
+                            <select id="attendance-prof" class="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all appearance-none cursor-pointer">
+                                <option value="" data-i18n="select-prof">Select Prof...</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                        </div>
+                        <!-- Subject Input -->
+                        <div class="relative w-40">
+                            <select id="attendance-subject" class="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all appearance-none cursor-pointer">
+                                <option value="" data-i18n="select-subject">Select Subject...</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                        </div>
+
+                        
+                        <!-- Status Selector -->
+                        <div class="relative w-36">
+                            <select id="attendance-status" class="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all appearance-none cursor-pointer">
+                                <option value="Present" data-i18n="present" selected>Present</option>
+                                <option value="On Leave" data-i18n="on-leave">On Leave</option>
+                                <option value="Absent" data-i18n="absent">Absent</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                        </div>
+
                         <!-- Scanner Input -->
                         <div class="relative flex-grow md:w-[320px]">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary font-bold">barcode_reader</span>
@@ -130,18 +166,17 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50/50">
-                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="worker-id">Worker ID</th>
+                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="student-id">Student ID</th>
                                         <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="full-name">Name</th>
+                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="prof-subject">Prof & Subject</th>
+                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="grade">Grade</th>
+                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="time-logged">Time Logged</th>
                                         <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="status">Status</th>
-                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="check-in">Check In</th>
-                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="check-out">Check Out</th>
-                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="overtime">Overtime</th>
-                                        <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100" data-i18n="notes">Notes</th>
                                         <th class="px-6 py-3 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100 text-right" data-i18n="actions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="attendance-tbody" class="divide-y divide-slate-100">
-                                    <tr><td colspan="8" class="px-6 py-12 text-center text-slate-400 font-medium flex flex-col items-center justify-center gap-2"><span class="material-symbols-outlined text-3xl animate-spin">sync</span> Loading entries...</td></tr>
+                                    <tr><td colspan="7" class="px-6 py-12 text-center text-slate-400 font-medium flex flex-col items-center justify-center gap-2"><span class="material-symbols-outlined text-3xl animate-spin">sync</span> <span data-i18n="loading-entries">Loading entries...</span></td></tr>
                                 </tbody>
                             </table>
                         </div>

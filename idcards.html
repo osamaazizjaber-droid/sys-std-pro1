@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>ID Cards - SYS WMS Pro</title>
+    <title>ID Cards - SYS STD Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;700;800&family=Tajawal:wght@400;700;800&family=Almarai:wght@400;700;800&family=Changa:wght@400;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="favicon.png?v=7" />
@@ -106,9 +106,9 @@
     <meta name="theme-color" content="#f49000">
     <link rel="apple-touch-icon" href="favicon.png">
     <script>
-        if ('serviceWorker' in navigator) {
+        if ('serviceStudent' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+                navigator.serviceStudent.register('sw.js').catch(err => console.log('ServiceStudent registration failed: ', err));
             });
         }
     </script>
@@ -118,15 +118,16 @@
 <!-- Standard App Header -->
 <header class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-surface-container-highest z-50">
     <div class="flex items-center gap-4">
-        <img alt="SYS WMS Pro Logo" class="h-16 sm:h-20 w-auto object-contain drop-shadow-md scale-[1.3] origin-left" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" onerror="this.style.display='none';" />
-        <span class="text-xl font-black bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent hidden sm:inline-block tracking-tight">SYS WMS Pro</span>
+        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain drop-shadow-md" src="logo.png" onerror="this.style.display='none';" />
+        <span class="text-xl font-black text-primary hidden sm:inline-block tracking-tight">SYS STD Pro</span>
     </div>
     <nav class="flex items-center gap-6">
         <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="workers.html" data-i18n="workers">Workers Management</a>
+        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
         <a class="text-orange-500 font-bold border-b-2 border-orange-500 pb-1 text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
         <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="advances.html" data-i18n="advances">Cash Advances</a>
         <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
         <div data-wms-settings-wrapper style="position:relative;">
           <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
@@ -149,7 +150,7 @@
     <header class="px-8 py-6 border-b border-surface-container flex justify-between items-center bg-surface-container-lowest flex-shrink-0">
         <div>
             <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="idcard-title">ID Card Generation</h2>
-            <p class="text-sm text-on-surface-variant mt-1" data-i18n="idcard-sub">Batch process and print worker identification cards.</p>
+            <p class="text-sm text-on-surface-variant mt-1" data-i18n="idcard-sub">Batch process and print student identification cards.</p>
         </div>
         <div class="flex gap-3">
             <button id="btn-print-cards" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm hover:shadow-lg hover:scale-105 transition-all shadow-sm flex items-center gap-2">
@@ -161,29 +162,29 @@
 
     <div class="flex-1 flex overflow-hidden">
         
-        <!-- Left Sidebar: Worker Selection -->
+        <!-- Left Sidebar: Student Selection -->
         <section class="w-80 border-r border-surface-container bg-surface-container-lowest flex flex-col h-full">
             <div class="p-4 border-b border-surface-container flex items-center justify-between bg-surface-container-low">
-                <h3 class="text-sm font-semibold text-on-surface uppercase tracking-wider" data-i18n="worker-list">Worker List</h3>
-                <span id="total-worker-count" class="text-xs bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-full font-medium">Loading...</span>
+                <h3 class="text-sm font-semibold text-on-surface uppercase tracking-wider" data-i18n="student-list">Student List</h3>
+                <span id="total-student-count" class="text-xs bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-full font-medium" data-i18n="loading-db">Loading...</span>
             </div>
             <div class="p-3 border-b border-surface-container">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
-                    <input id="search-workers" class="w-full bg-surface-container-highest border-none rounded-lg pl-9 pr-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary placeholder-on-surface-variant outline-none" placeholder="Search by name or ID..." data-i18n-placeholder="search-workers" type="text"/>
+                    <input id="search-students" class="w-full bg-surface-container-highest border-none rounded-lg pl-9 pr-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary placeholder-on-surface-variant outline-none" placeholder="Search by name or ID..." data-i18n-placeholder="search-students" type="text"/>
                 </div>
             </div>
             <div class="px-4 py-3 border-b border-surface-container bg-surface">
                 <label class="flex items-center gap-3 cursor-pointer group">
                     <div class="relative flex items-center">
-                        <input id="select-all-workers" class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-outline-variant checked:border-primary checked:bg-primary transition-all" type="checkbox"/>
+                        <input id="select-all-students" class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-outline-variant checked:border-primary checked:bg-primary transition-all" type="checkbox"/>
                         <span class="material-symbols-outlined absolute text-on-primary text-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 pointer-events-none" style="font-variation-settings: 'wght' 600;">check</span>
                     </div>
                     <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors" data-i18n="select-all">Select All Filtered</span>
                 </label>
             </div>
             
-            <div id="worker-list-container" class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div id="student-list-container" class="flex-1 overflow-y-auto p-2 space-y-1">
                 <!-- Data populated dynamically via JS -->
                 <div class="text-center p-4 text-sm text-slate-400" data-i18n="loading-db">Loading DB...</div>
             </div>
@@ -203,9 +204,9 @@
                 
                 <!-- Top Accent Header Block -->
                 <div id="card-header" class="h-[52px] w-full flex items-center justify-between px-3 relative shrink-0 transition-colors duration-300" style="background-color: #f49000;">
-                    <h2 class="text-white font-bold text-[14px] tracking-[0.2em] uppercase w-full">SYS WMS PRO</h2>
+                    <h2 class="text-white font-bold text-[14px] tracking-[0.2em] uppercase w-full">SYS STD PRO</h2>
                     <div class="size-9 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-sm shrink-0 border-[1.5px] border-white">
-                        <img class="w-full h-full object-cover p-[2px]" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" alt="Logo">
+                        <img class="w-full h-full object-cover p-[2px]" src="logo.png" alt="Logo">
                     </div>
                 </div>
                 
@@ -213,13 +214,14 @@
                 <div class="flex-1 flex flex-row p-3 gap-4 relative bg-white">
                     <!-- Left Angle Photo -->
                     <div class="w-[96px] h-full rounded border-[1.5px] border-slate-200 overflow-hidden shadow-sm shrink-0 bg-slate-100 relative">
-                        <img id="card-photo" alt="Worker Portrait" class="w-full h-full object-cover" src="https://cdn-icons-png.flaticon.com/512/847/847969.png"/>
+                        <img id="card-photo" alt="Student Portrait" class="w-full h-full object-cover" src="https://cdn-icons-png.flaticon.com/512/847/847969.png"/>
                     </div>
                     
                     <!-- Right Text/Barcode -->
                     <div class="flex-1 flex flex-col justify-center items-center text-center overflow-hidden">
-                        <h4 id="card-name" class="text-[22px] font-bold text-slate-900 w-full truncate leading-tight tracking-tight">Select Worker</h4>
-                        <p id="card-position" class="text-[14.5px] font-bold text-primary uppercase w-full truncate mt-1">Position</p>
+                        <h4 id="card-name" class="text-[22px] font-bold text-slate-900 w-full truncate leading-tight tracking-tight">Select Student</h4>
+                        <p id="card-grade" class="text-[14.5px] font-bold text-primary uppercase w-full truncate mt-1">Grade</p>
+                        <p id="card-year" class="text-[11px] font-bold text-slate-500 uppercase w-full truncate mt-0.5 tracking-widest">Academic Year</p>
                         
                         <!-- High Barcode 128 -->
                         <div id="barcode-section" class="mt-auto w-full flex flex-col items-center pt-2">
@@ -263,7 +265,7 @@
                     </div>
 
                     <div class="flex flex-col gap-1.5 pt-2">
-                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider" data-i18n="secondary-logo">Secondary Logo</label>
+                        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider" data-i18n="secondary-logo">College Logo</label>
                         <div class="relative w-full">
                             <input type="file" id="secondary-logo-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                             <div class="flex items-center justify-center gap-2 w-full bg-surface-container-low border border-outline-variant/30 rounded-lg text-sm text-on-surface hover:bg-surface-container py-2 px-3 transition-colors">

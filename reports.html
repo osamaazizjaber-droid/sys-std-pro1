@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SYS WMS Pro</title>
+    <title>SYS STD Pro</title>
     <link rel="icon" type="image/png" href="favicon.png?v=7" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="css/themes.css"/>
@@ -97,12 +97,13 @@
     <meta name="theme-color" content="#f49000">
     <link rel="apple-touch-icon" href="favicon.png">
     <script>
-        if ('serviceWorker' in navigator) {
+        if ('serviceStudent' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+                navigator.serviceStudent.register('sw.js').catch(err => console.log('ServiceStudent registration failed: ', err));
             });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-surface text-on-surface antialiased font-body">
     <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
@@ -112,16 +113,17 @@
             <header class="w-full bg-white border-b border-surface-variant px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
                 <div class="flex items-center gap-3 text-on-surface">
                     <div class="h-16 w-auto flex items-center">
-                        <img alt="SYS WMS Pro Logo" class="h-full object-contain scale-[1.3] origin-left" src="https://ormjypixacnedlmqrxfq.supabase.co/storage/v1/object/public/SYS%20WMS%20Pro/logo/logo.png" />
+                        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain" src="logo.png" />
                     </div>
-                    <h2 class="text-xl font-black tracking-tighter text-slate-900">SYS WMS Pro</h2>
+                    <h2 class="text-xl font-black tracking-tighter text-primary">SYS STD Pro</h2>
                 </div>
                 <nav class="flex items-center gap-6">
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="workers.html" data-i18n="workers">Workers Management</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="advances.html" data-i18n="advances">Cash Advances</a>
                     <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="reports.html" data-i18n="reports">Reports</a>
                     <div data-wms-settings-wrapper style="position:relative;">
                       <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
@@ -147,27 +149,63 @@
             <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
                 <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0 hide-on-print">
                     <div>
-                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="reports-title">Payroll & Attendance</h2>
+                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="reports-title">Student Attendance Metrics</h2>
                         <p class="text-sm text-on-surface-variant mt-1"><span data-i18n="reports-sub">Operational audit for</span> <span id="date-range-display" class="font-bold text-on-surface">Loading...</span></p>
                     </div>
                     
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-center bg-surface-container p-1 rounded-xl border border-outline-variant/30">
-                            <div class="flex flex-col px-3 border-r border-outline-variant/30">
-                                <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="start-date">Date Range Start</label>
-                                <input type="date" id="report-start-date" class="border-none bg-transparent text-sm font-semibold text-on-surface focus:ring-0 p-0 m-0 outline-none cursor-pointer text-slate-900 dark:text-slate-100">
+                    <div class="flex flex-col gap-4 w-full mt-4 bg-surface-container-lowest border border-outline-variant/30 p-2 rounded-2xl shadow-sm">
+                        <!-- Top Toolbar Tier: Dates & Grouping -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 w-full bg-surface-container-low p-2 rounded-xl border border-outline-variant/20">
+                            <div class="flex items-center bg-white p-1 rounded-lg border border-outline-variant/30 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                                <div class="flex flex-col px-3 border-r border-outline-variant/30">
+                                    <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="start-date">Date Range Start</label>
+                                    <input type="date" id="report-start-date" class="border-none bg-transparent text-sm font-semibold text-slate-800 focus:ring-0 p-0 m-0 outline-none cursor-pointer">
+                                </div>
+                                <div class="flex flex-col px-3">
+                                    <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="end-date">Date Range End</label>
+                                    <input type="date" id="report-end-date" class="border-none bg-transparent text-sm font-semibold text-slate-800 focus:ring-0 p-0 m-0 outline-none cursor-pointer">
+                                </div>
                             </div>
-                            <div class="flex flex-col px-3">
-                                <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="end-date">Date Range End</label>
-                                <input type="date" id="report-end-date" class="border-none bg-transparent text-sm font-semibold text-on-surface focus:ring-0 p-0 m-0 outline-none cursor-pointer text-slate-900 dark:text-slate-100">
+                            
+                            <select id="report-group-by" class="bg-primary text-white border-none text-sm font-bold rounded-lg px-4 py-2.5 outline-none shadow-md cursor-pointer hover:bg-primary-dark transition-colors appearance-none min-w-[200px]">
+                                <option value="NONE" data-i18n="ungrouped" class="bg-white text-slate-800">Ungrouped (Flat)</option>
+                                <option value="grade" data-i18n="group-by-grade" class="bg-white text-slate-800">Group by Grade</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Bottom Toolbar Tier: Filters & Actions -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 w-full px-2 pb-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <select id="report-filter-grade" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
+                                    <option value="ALL" data-i18n="all-grades">All Grades</option>
+                                </select>
+                                <select id="report-filter-subject" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
+                                    <option value="ALL" data-i18n="all-subjects">All Subjects</option>
+                                </select>
+                                <select id="report-filter-prof" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
+                                    <option value="ALL" data-i18n="all-profs">All Professors</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label class="flex items-center gap-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg cursor-pointer hover:bg-rose-100 transition-colors shadow-sm">
+                                    <input type="checkbox" id="at-risk-filter" class="w-4 h-4 text-rose-600 rounded focus:ring-rose-500 border-rose-300">
+                                    <span class="text-xs font-black tracking-wider text-rose-700 uppercase whitespace-nowrap" data-i18n="at-risk-only">At-Risk Only</span>
+                                </label>
+
+                                <div class="w-px h-6 bg-outline-variant/50 mx-1 hidden sm:block"></div>
+
+                                <button id="btnRunReport" class="px-5 py-2 hover:-translate-y-0.5 bg-white text-slate-700 rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-slate-200 shadow-sm hover:shadow-md">
+                                    <span class="material-symbols-outlined text-[18px]">sync</span> <span data-i18n="run-report">Compute</span>
+                                </button>
+                                <button id="btnExportCsv" class="px-5 py-2 hover:-translate-y-0.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg text-sm font-bold shadow-sm hover:shadow-md shadow-emerald-500/20 flex items-center gap-2 transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">download</span> <span data-i18n="export-csv">Export CSV</span>
+                                </button>
+                                <button id="btnPrintReport" class="px-5 py-2 hover:-translate-y-0.5 bg-gradient-to-r from-primary to-primary-container text-white rounded-lg text-sm font-bold shadow-sm hover:shadow-md shadow-primary/20 flex items-center gap-2 transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">print</span> <span data-i18n="export-pdf">Export PDF</span>
+                                </button>
                             </div>
                         </div>
-                        <button id="btnRunReport" class="px-5 py-2.5 bg-surface hover:bg-surface-container-high text-on-surface rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-outline-variant/30 shadow-sm">
-                            <span class="material-symbols-outlined text-lg">sync</span> <span data-i18n="run-report">Compute</span>
-                        </button>
-                        <button id="btnPrintReport" class="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-container text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-all">
-                            <span class="material-symbols-outlined text-lg">print</span> <span data-i18n="export-pdf">Export PDF</span>
-                        </button>
                     </div>
                 </header>
 
@@ -176,73 +214,38 @@
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 mb-8">
                 <div class="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="gross-pay">Total Gross Pay</p>
-                    <h3 id="kpi-gross-pay" class="text-2xl font-black text-on-surface">...</h3>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-students">Total Students</p>
+                    <h3 id="kpi-total-students" class="text-2xl font-black text-on-surface">...</h3>
                     <div class="flex items-center gap-1 text-emerald-600 text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">calendar_month</span> <span id="kpi-date-range">Loading Period...</span>
+                        <span class="material-symbols-outlined text-sm">groups</span> <span data-i18n="active-roster">Registered in System</span>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="net-pay">Total Net Pay</p>
-                    <h3 id="kpi-net-pay" class="text-2xl font-black text-on-surface">...</h3>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-days">Active Days in Period</p>
+                    <h3 id="kpi-total-days" class="text-2xl font-black text-on-surface">...</h3>
                     <div class="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">payments</span> <span data-i18n="gross-minus-adv">Gross minus Advances</span>
+                        <span class="material-symbols-outlined text-sm">calendar_month</span> <span id="kpi-date-range" data-i18n="loading-period">Loading Period...</span>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="ot-logged">Total OT Logged</p>
-                    <h3 id="kpi-ot-hrs" class="text-2xl font-black text-on-surface">...</h3>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-attendances">Total Attendances</p>
+                    <h3 id="kpi-attendances" class="text-2xl font-black text-on-surface">...</h3>
                     <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">schedule</span> <span data-i18n="paid-standard">Paid at Standard Rate (1x)</span>
+                        <span class="material-symbols-outlined text-sm">fact_check</span> <span data-i18n="records">Logs captured</span>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="advances-deducted">Advances Deducted</p>
-                    <h3 id="kpi-advances" class="text-2xl font-black text-error">...</h3>
-                    <p class="text-[10px] text-slate-400 font-bold" data-i18n="recovered-payroll">Recovered from payroll</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="avg-rate">Attendance Rate</p>
+                    <h3 id="kpi-rate" class="text-2xl font-black text-emerald-600">...</h3>
+                    <p class="text-[10px] text-slate-400 font-bold" data-i18n="avg-rate-desc">Overall average across period</p>
                 </div>
             </div>
 
             <!-- Print-Only Report Header -->
             <div class="hidden print:block border-b-2 border-primary pb-4 mb-2" style="display:none;" id="print-report-header">
-                <h2 class="text-2xl font-black text-slate-900" data-i18n="print-report-title">SYS WMS Pro &mdash; Payroll &amp; Attendance Report</h2>
+                <h2 class="text-2xl font-black text-slate-900" data-i18n="print-report-title">SYS STD Pro &mdash; Student Attendance Report</h2>
                 <p class="text-sm text-slate-500 mt-1"><span data-i18n="reporting-period">Reporting Period:</span> <strong id="print-period-display" class="text-slate-800">—</strong></p>
             </div>
-
-            <!-- Salary Report Section -->
-            <section class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h4 class="text-lg font-bold flex items-center gap-2 text-on-surface">
-                        <span class="w-2 h-6 bg-primary rounded-full"></span>
-                        <span data-i18n="salary-report">Salary Reconciliation Report</span>
-                    </h4>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
-                    <div class="overflow-x-auto custom-scrollbar border-b border-slate-100">
-                        <table class="w-full text-start border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200">
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="worker-id">ID</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="full-name">Name</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="position">Pos</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="daily-rate">Daily Rate</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="days">Days</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="ot-hrs">OT Hrs</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="reg-pay">Reg Pay</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="ot-pay">OT Pay</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="gross">Gross</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="advances">Advances</th>
-                                    <th class="p-4 text-[10px] font-black uppercase text-primary tracking-tighter text-end" data-i18n="net-pay-col">Net Pay</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reports-tbody" class="divide-y divide-slate-50">
-                                <tr><td colspan="11" class="p-12 text-center text-slate-400 font-bold tracking-widest"><span class="material-symbols-outlined animate-spin text-3xl mb-2">sync</span><br>Computing Matrix...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
 
             <!-- Detailed Attendance Matrix -->
             <section class="space-y-4 print-break">
@@ -251,18 +254,33 @@
                         <span class="w-2 h-6 bg-primary rounded-full"></span>
                         <span data-i18n="attendance-matrix">Attendance Heatmap Matrix</span>
                     </h4>
-                    <div class="flex items-center gap-4 text-xs">
+                    <div class="flex flex-wrap items-center gap-4 text-xs">
                         <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> <span data-i18n="present">Present</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span> <span data-i18n="on-leave">On Leave</span></div>
                         <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-error"></span> <span data-i18n="absent">Absent</span></div>
                     </div>
                 </div>
                 
+
+                <!-- Trend Analytics Chart -->
+                <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] mb-6 p-6 border border-slate-100 hidden" id="chart-container">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-black text-on-surface uppercase tracking-wider flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">insights</span>
+                            <span data-i18n="attendance-trends">Attendance Trends</span>
+                        </h4>
+                    </div>
+                    <div class="w-full h-[250px]">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
                 <div id="original-matrix-wrapper" class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-center border-collapse">
                             <thead>
                                 <tr id="matrix-head" class="bg-slate-50 border-b border-slate-200">
-                                    <th class="p-4 text-[10px] font-black uppercase text-on-surface tracking-tighter text-left sticky left-0 bg-slate-100 z-10 w-48 shadow-[2px_0_5px_rgba(0,0,0,0.02)]" data-i18n="worker-name">Worker Name</th>
+                                    <th class="p-4 text-[10px] font-black uppercase text-on-surface tracking-tighter text-left sticky left-0 bg-slate-100 z-10 w-48 shadow-[2px_0_5px_rgba(0,0,0,0.02)]" data-i18n="student-name">Student Name</th>
                                     <!-- Dynamic Days Header Injected Here -->
                                 </tr>
                             </thead>
@@ -301,5 +319,65 @@
       syncUI();
     });
     </script>
+
+    <!-- Individual Student Record Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="studentModalContent">
+            
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 print:hidden">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">person</span>
+                    <span data-i18n="student-record">Term Report Card</span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="printStudentModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">print</span>
+                    </button>
+                    <button onclick="closeStudentModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto" id="studentModalPrintArea">
+                <div class="flex gap-4 items-start mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-2xl" id="modal-initial">?</div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900" id="modal-name">Student Name</h2>
+                        <p class="text-sm font-bold text-slate-400 font-mono tracking-widest mt-1" id="modal-id">ID: 12345</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-center">
+                        <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1" data-i18n="present">Present</p>
+                        <h4 class="text-2xl font-black text-emerald-700" id="modal-p">0</h4>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center">
+                        <p class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1" data-i18n="on-leave">Leave</p>
+                        <h4 class="text-2xl font-black text-amber-700" id="modal-l">0</h4>
+                    </div>
+                    <div class="bg-rose-50 p-4 rounded-xl border border-rose-100 text-center">
+                        <p class="text-xs font-bold text-rose-600 uppercase tracking-widest mb-1" data-i18n="absent">Absent</p>
+                        <h4 class="text-2xl font-black text-rose-700" id="modal-a">0</h4>
+                    </div>
+                </div>
+                
+                <h4 class="text-xs font-black uppercase text-slate-500 tracking-widest border-b border-slate-100 pb-2 mb-3"><span data-i18n="absence-history">Absence & Leave History</span></h4>
+                <div class="bg-slate-50 rounded-xl border border-slate-100 p-2 overflow-hidden">
+                    <table class="w-full text-left border-collapse" id="modal-history-table">
+                        <thead class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                            <tr><th class="p-2 border-b border-slate-200">Date</th><th class="p-2 border-b border-slate-200">Status</th><th class="p-2 border-b border-slate-200">Subject</th><th class="p-2 border-b border-slate-200">Professor</th></tr>
+                        </thead>
+                        <tbody class="text-xs font-medium text-slate-700 divide-y divide-slate-100" id="modal-history-body">
+                            <!-- Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
 </body>
 </html>

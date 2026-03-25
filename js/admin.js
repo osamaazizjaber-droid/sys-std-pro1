@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ADMIN_EMAILS = ['syscompany85@gmail.com', 'osama@syswms.com'];
 
     // The Web App URL you get from deploying your Google Apps Script (Code.gs)
-    const GOOGLE_APPS_SCRIPT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxRywNchuN3mjWYjqjlNcEENChO9ofrduzFpr6-EV7tIP_T-nZtkIJSINrtoLlRDk2p/exec";
+    const GOOGLE_APPS_SCRIPT_WEBHOOK = "https://script.google.com/macros/s/AKfycbzptiX1BmeEvHNXalBHfOQ475539K8ZmgRxqqG7wWLLbgDlzN6ePomXXdzwGl8-dnAnVA/exec";
 
     const { data: { user } } = await sbClient.auth.getUser();
 
@@ -72,19 +72,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${company.status}
                     </span>
                 </td>
-                <td class="p-4 text-right space-x-2">
+                <td class="p-4 text-right space-x-2 whitespace-nowrap">
                     ${company.status === 'pending' ? `
                         <button onclick="window.confirmAction('${company.id}', 'approve', '${company.company_name}', '${company.email}')" 
-                                class="inline-flex items-center gap-1 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white border border-green-200 hover:border-green-600 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all">
-                            <span class="material-symbols-outlined text-[18px]">check</span> Approve
+                                title="Approve"
+                                class="inline-flex items-center gap-1 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white border border-green-200 hover:border-green-600 px-2.5 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all">
+                            <span class="material-symbols-outlined text-[18px]">check</span>
                         </button>
                         <button onclick="window.confirmAction('${company.id}', 'reject', '${company.company_name}', '${company.email}')" 
-                                class="inline-flex items-center gap-1 bg-red-50 text-red-700 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all">
-                            <span class="material-symbols-outlined text-[18px]">close</span> Reject
+                                title="Reject"
+                                class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 hover:border-amber-600 px-2.5 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
                         </button>
                     ` : `
-                       <span class="text-xs font-bold text-slate-400 mr-2 text-center inline-block">Processed</span>
+                       <span class="text-xs font-bold text-slate-400 mr-2 inline-block">Processed</span>
                     `}
+                    <button onclick="window.confirmAction('${company.id}', 'delete', '${company.company_name}', '${company.email}')" 
+                            title="Delete Permanently"
+                            class="inline-flex items-center gap-1 bg-slate-50 text-slate-700 hover:bg-red-600 hover:text-white border border-slate-200 hover:border-red-600 px-2.5 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all ml-1">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -121,13 +128,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             iconBg.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white bg-green-500';
             btnConfirm.className = 'px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-colors flex items-center gap-2 text-sm bg-green-600 hover:bg-green-700';
             btnText.textContent = 'Yes, Approve';
-        } else {
+        } else if (type === 'reject') {
             title.textContent = 'Reject Registration?';
             desc.textContent = `Are you sure you want to reject ${name}? They will be denied access and notified via email.`;
             icon.textContent = 'cancel';
-            iconBg.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white bg-red-500';
-            btnConfirm.className = 'px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-colors flex items-center gap-2 text-sm bg-red-600 hover:bg-red-700';
+            iconBg.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white bg-amber-500';
+            btnConfirm.className = 'px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-colors flex items-center gap-2 text-sm bg-amber-600 hover:bg-amber-700';
             btnText.textContent = 'Yes, Reject';
+        } else if (type === 'delete') {
+            title.textContent = 'Delete Permanently?';
+            desc.textContent = `Are you sure you want to completely delete ${name}? This action cannot be undone.`;
+            icon.textContent = 'delete_forever';
+            iconBg.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white bg-red-600';
+            btnConfirm.className = 'px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-colors flex items-center gap-2 text-sm bg-red-600 hover:bg-red-700';
+            btnText.textContent = 'Yes, Delete';
         }
 
         modal.classList.remove('hidden');
@@ -158,32 +172,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         spinner.classList.remove('hidden');
 
         try {
-            const newStatus = currentAction.type === 'approve' ? 'approved' : 'rejected';
+            if (currentAction.type === 'delete') {
+                const { error: dbError } = await sbClient
+                    .from('companies')
+                    .delete()
+                    .eq('id', currentAction.id);
 
-            // 1. Update Database Status
-            const { error: dbError } = await sbClient
-                .from('companies')
-                .update({ status: newStatus })
-                .eq('id', currentAction.id);
-
-            if (dbError) throw new Error("Database update failed: " + dbError.message);
-
-            // 2. Trigger Google Apps Script Webhook for Email Dispatch
-            // We use no-cors if the Google Script doesn't return proper CORS headers.
-            // Ideally it returns CORS, but 'no-cors' at least fires the request.
-            if (GOOGLE_APPS_SCRIPT_WEBHOOK.includes("YOUR_SCRIPT_ID")) {
-                console.warn("Emails not sent: Google Apps Script Webhook URL is not configured yet.");
+                if (dbError) throw new Error("Delete failed: " + dbError.message);
+                // No email dispatch for permanent deletion
             } else {
-                fetch(GOOGLE_APPS_SCRIPT_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'company_status_change',
-                        email: currentAction.email,
-                        status: newStatus,
-                        company_name: currentAction.name
-                    }) // Sending as form-data is easiest for GAS doPost(e)
-                }).catch(err => console.error("Webhook trigger failed:", err));
+                const newStatus = currentAction.type === 'approve' ? 'approved' : 'rejected';
+
+                // 1. Update Database Status
+                const { error: dbError } = await sbClient
+                    .from('companies')
+                    .update({ status: newStatus })
+                    .eq('id', currentAction.id);
+
+                if (dbError) throw new Error("Database update failed: " + dbError.message);
+
+                // 2. Trigger Google Apps Script Webhook for Email Dispatch
+                if (GOOGLE_APPS_SCRIPT_WEBHOOK.includes("YOUR_SCRIPT_ID")) {
+                    console.warn("Emails not sent: Google Apps Script Webhook URL is not configured yet.");
+                } else {
+                    fetch(GOOGLE_APPS_SCRIPT_WEBHOOK, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'company_status_change',
+                            email: currentAction.email,
+                            status: newStatus,
+                            company_name: currentAction.name
+                        }).toString()
+                    }).catch(err => console.error("Webhook trigger failed:", err));
+                }
             }
 
             // Success! Reload the list!

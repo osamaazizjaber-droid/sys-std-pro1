@@ -1,5 +1,5 @@
 /**
- * SYS WMS Pro - Official Google Apps Script Webhook
+ * SYS STD Pro - Official Google Apps Script Webhook
  * 
  * Instructions:
  * 1. Go to https://script.google.com/ and create a "New Project".
@@ -29,7 +29,7 @@ function doPost(e) {
     }
 
     // 2. Prepare Email Content
-    const systemName = "SYS WMS Pro";
+    const systemName = "SYS STD Pro";
     let subject = "";
     let bodyText = "";
     let bodyHtml = "";
@@ -37,13 +37,13 @@ function doPost(e) {
     if (status === 'approved') {
       subject = `✅ Your Account is Approved - ${systemName}`;
       
-      bodyText = `Hello ${companyName},\n\nYour registration for SYS WMS Pro has been approved! You can now log into your dashboard to start managing your industrial workforce.\n\nThank you,\nThe Admin Team`;
+      bodyText = `Hello ${companyName},\n\nYour registration for SYS STD Pro has been approved! You can now log into your dashboard to start managing your academic institution.\n\nThank you,\nThe Admin Team`;
       
       bodyHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e3e4; border-radius: 10px;">
           <h2 style="color: #10b981; margin-bottom: 20px;">Welcome to ${systemName}</h2>
           <p style="font-size: 16px; color: #333;">Hello <strong>${companyName}</strong>,</p>
-          <p style="font-size: 16px; color: #555; line-height: 1.5;">Your company registration has been officially approved by the administrator. You now have full access to your intelligent dashboard.</p>
+          <p style="font-size: 16px; color: #555; line-height: 1.5;">Your college registration has been officially approved by the administrator. You now have full access to your intelligent academic dashboard.</p>
           
           <a href="https://osamaazizjaber-droid.github.io/sys-wms-pro/" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #f49000; color: white; text-decoration: none; font-weight: bold; border-radius: 6px;">Login to Dashboard</a>
           
@@ -54,7 +54,7 @@ function doPost(e) {
     else if (status === 'rejected') {
       subject = `🚫 Account Registration Update - ${systemName}`;
       
-      bodyText = `Hello ${companyName},\n\nWe regret to inform you that your registration for SYS WMS Pro was not approved. If you believe this is an error, please respond to this email.\n\nThank you,\nThe Admin Team`;
+      bodyText = `Hello ${companyName},\n\nWe regret to inform you that your registration for SYS STD Pro was not approved. If you believe this is an error, please respond to this email.\n\nThank you,\nThe Admin Team`;
       
       bodyHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e3e4; border-radius: 10px;">
@@ -84,7 +84,7 @@ function doPost(e) {
 
 // Ignore GET requests (usually happens if someone pastes the webhook URL in their browser)
 function doGet(e) {
-  return response("SYS WMS Pro Webhook is Active. Awaiting POST requests.");
+  return response("SYS STD Pro Webhook is Active. Awaiting POST requests.");
 }
 
 // Utility to return JSON to the caller

@@ -10,19 +10,125 @@ document.addEventListener('DOMContentLoaded', async () => {
     const attDateInput = document.getElementById('attendance-date');
     const attBarcodeInput = document.getElementById('attendance-barcode');
     const tbody = document.getElementById('attendance-tbody');
+    const gradeSelect = document.getElementById('attendance-grade');
+    const profSelect = document.getElementById('attendance-prof');
+    const subjSelect = document.getElementById('attendance-subject');
+
     let attendanceList = [];
-    let workersList = [];
+    let studentsList = [];
+    let profsList = [];
+    let allAssignments = []; 
 
-    // Load workers for lookup
-    const { data: wData } = await supabase.from('workers').select('id, name');
-    if (wData) workersList = wData;
+    async function init() {
+        await loadStudents();
+        await loadProfessors();
+        await loadAssignments();
+        loadAttendanceData();
+    }
 
-    // Init Date (Local Timezone Safe)
+    async function loadStudents() {
+        const { data } = await supabase.from('students').select('student_id, student_name, grade');
+        if (data) {
+            studentsList = data;
+            if (gradeSelect) {
+                const uniqueGrades = [...new Set(studentsList.map(s => s.grade).filter(Boolean))];
+                gradeSelect.innerHTML = '<option value="ALL">All Stages</option>';
+                uniqueGrades.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g; opt.textContent = g;
+                    gradeSelect.appendChild(opt);
+                });
+                gradeSelect.addEventListener('change', () => {
+                    renderAttendanceTable();
+                    updateSubjectDropdown();
+                });
+            }
+        }
+    }
+
+    async function loadProfessors() {
+        const { data } = await supabase.from('professors').select('prof_id, prof_name');
+        if (data && profSelect) {
+            profsList = data;
+            const lang = window.WMSSettings ? window.WMSSettings.get('lang') : 'en';
+            const dict = window.WMS_I18N[lang] || window.WMS_I18N['en'];
+            profSelect.innerHTML = `<option value="">${dict['select-prof'] || 'Select Professor...'}</option>`;
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.prof_id;
+                opt.textContent = p.prof_name;
+                profSelect.appendChild(opt);
+            });
+            profSelect.addEventListener('change', () => {
+                // If professor is selected, filter subjects. If cleared, show all for grade.
+                updateSubjectDropdown(true); 
+            });
+        }
+    }
+
+    async function loadAssignments() {
+        const { data } = await supabase.from('subject_assignments').select('*, professors(prof_name)');
+        if (data) {
+            allAssignments = data;
+            updateSubjectDropdown();
+        }
+    }
+
+    function updateSubjectDropdown(filteredByProf = false) {
+        if (!subjSelect) return;
+        const selectedGrade = gradeSelect?.value;
+        const selectedProf = profSelect?.value;
+        
+        const prevValue = subjSelect.value;
+        subjSelect.innerHTML = `<option value="">Select Subject...</option>`;
+        
+        let filtered = allAssignments;
+        if (selectedGrade && selectedGrade !== 'ALL') {
+            filtered = filtered.filter(a => a.stage_name === selectedGrade);
+        }
+        if (selectedProf) {
+            filtered = filtered.filter(a => a.prof_id === selectedProf);
+        }
+
+        if (filtered.length > 0) {
+            // Unique subjects in case one subject is assigned to multiple profs (though unlikely in current flow, we take uniquely for display)
+            const uniqueSubjs = [...new Set(filtered.map(a => a.subject_name))];
+            uniqueSubjs.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                subjSelect.appendChild(opt);
+            });
+
+            // Try to restore previous value if still valid
+            if (prevValue && uniqueSubjs.includes(prevValue)) {
+                subjSelect.value = prevValue;
+            } else if (filtered.length === 1 && !filteredByProf) {
+                // Auto-set if only one subject for this grade
+                subjSelect.selectedIndex = 1;
+                autoSelectProfessor(subjSelect.value);
+            }
+        }
+    }
+
+    subjSelect?.addEventListener('change', () => {
+        autoSelectProfessor(subjSelect.value);
+    });
+
+    function autoSelectProfessor(subjectName) {
+        if (!subjectName || !profSelect) return;
+        const selectedGrade = gradeSelect?.value;
+        
+        let match = allAssignments.find(a => a.subject_name === subjectName && (selectedGrade === 'ALL' || a.stage_name === selectedGrade));
+        if (match) {
+            profSelect.value = match.prof_id;
+        }
+    }
+
+    // Init Date
     const d = new Date();
     const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     attDateInput.value = today;
-
-    loadAttendanceData();
 
     attDateInput.addEventListener('change', loadAttendanceData);
 
@@ -33,162 +139,109 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(!code) return;
             await processAttendanceScan(code);
             attBarcodeInput.value = '';
-            attBarcodeInput.focus(); // Keep scanning active continuously
+            attBarcodeInput.focus();
         }
     });
 
     async function processAttendanceScan(code) {
-        let workerId = parseInt(code.replace(/\D/g, ''));
-        let workerSearch = code;
-        
-        let worker = workersList.find(w => w.id === workerId || w.name.toLowerCase().includes(workerSearch.toLowerCase()));
-        
-        if (!worker) {
-            const { data } = await supabase.from('workers').select('*').or(`id.eq.${workerId},name.ilike.%${workerSearch}%`).limit(1);
-            if (data && data.length > 0) worker = data[0];
+        let student = studentsList.find(s => s.student_id === code || s.student_name.toLowerCase().includes(code.toLowerCase()));
+        if (!student) {
+            const { data } = await supabase.from('students').select('*').or(`student_id.eq.${code},student_name.ilike.%${code}%`).limit(1);
+            if (data && data.length > 0) student = data[0];
         }
 
-        if(!worker) {
-            alert(`Worker not found: ${code}`);
+        if(!student) {
+            alert(`Student not found: ${code}`);
             return;
         }
 
         const scanDate = attDateInput.value;
         const scanTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true});
+        const profId = profSelect?.value || null;
+        const subj = subjSelect?.value || 'General';
+        const profName = profId ? profsList.find(p => p.prof_id === profId)?.prof_name : null;
 
         try {
             const { data: existing } = await supabase.from('attendance')
                 .select('*')
-                .eq('worker_id', worker.id)
-                .eq('date', scanDate);
+                .eq('student_id', student.student_id)
+                .eq('date', scanDate)
+                .eq('subject', subj);
                 
             if (existing && existing.length > 0) {
-                const record = existing[0];
-                if (!record.check_out) {
-                    // Completing Shift (Check Out)
-                    await supabase.from('attendance').update({ 
-                        status: 'Completed', 
-                        check_out: scanTime
-                    }).eq('id', record.id);
-                } else {
-                    alert(`${worker.name} has already checked out for today!`);
-                }
+                alert(`${student.student_name} already logged for ${subj} today.`);
             } else {
-                // Starting Shift (Check In)
                 await supabase.from('attendance').insert([{
-                    worker_id: worker.id,
-                    worker_name: worker.name,
+                    student_id: student.student_id,
+                    student_name: student.student_name,
+                    prof_id: profId,
+                    prof_name: profName,
                     date: scanDate,
-                    status: 'Active Shift',
+                    subject: subj,
+                    grade: student.grade,
+                    status: document.getElementById('attendance-status')?.value || 'Present',
                     check_in: scanTime,
-                    overtime: 0,
                     notes: 'Auto-Log'
                 }]);
             }
             loadAttendanceData();
         } catch(err) {
-            console.error(err);
-            alert("Error logging attendance: " + err.message);
+            alert("Error: " + err.message);
         }
     }
 
     async function loadAttendanceData() {
         const scanDate = attDateInput.value;
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-text-muted-light">Loading...</td></tr>`;
-        
-        try {
-            const { data, error } = await supabase.from('attendance').select('*').eq('date', scanDate).order('id', {ascending: false});
-            if(error) throw error;
-            attendanceList = data || [];
-            renderAttendanceTable();
-        } catch(err) {
-            console.error(err);
-            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">Error loading.</td></tr>`;
-        }
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-300">Loading...</td></tr>`;
+        const { data } = await supabase.from('attendance').select('*').eq('date', scanDate).order('id', {ascending: false});
+        attendanceList = data || [];
+        renderAttendanceTable();
     }
 
     function renderAttendanceTable() {
-        if(attendanceList.length > 0) {
-            tbody.innerHTML = '';
-            attendanceList.forEach(att => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/50 transition-colors group";
-                
-                // Formatted Worker ID
-                const formattedId = `W-${att.worker_id.toString().padStart(3, '0')}`;
+        const selectedGrade = gradeSelect ? gradeSelect.value : 'ALL';
+        let displayList = attendanceList;
+        if (selectedGrade !== 'ALL') displayList = displayList.filter(a => a.grade === selectedGrade);
 
-                // Status Badge Logic
-                let statusBadge = '';
-                if(att.status === 'Active Shift' || att.status === 'Checked In') {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 shadow-sm">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span class="text-xs font-bold uppercase tracking-wide">Active</span>
-                        </div>
-                    `;
-                } else {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span class="text-xs font-bold uppercase tracking-wide">Completed</span>
-                        </div>
-                    `;
-                }
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-sm font-bold text-slate-500">${formattedId}</td>
-                    <td class="px-6 py-4 font-black text-sm text-slate-900">${att.worker_name}</td>
-                    <td class="px-6 py-4 text-sm">${statusBadge}</td>
-                    <td class="px-6 py-4 text-sm text-slate-700 font-bold">${att.check_in || '--:--'}</td>
-                    <td class="px-6 py-4 text-sm text-slate-700 font-bold">${att.check_out || '--:--'}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500 font-bold">
-                        <div class="flex items-center gap-1 opacity-70 hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                            <input type="number" 
-                               value="${att.overtime || 0}" 
-                               step="0.5" 
-                               min="0"
-                               onchange="updateOvertime(${att.id}, this.value)"
-                               class="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface hover:bg-white transition-colors text-slate-700 font-bold shadow-sm">
-                            <span class="text-xs text-slate-400 font-medium">h</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-slate-500 font-medium">${att.notes || '-'}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="deleteAttendance(${att.id})" class="p-1.5 text-slate-300 hover:text-error hover:bg-error/10 rounded-lg transition-all opacity-0 group-hover:opacity-100" title="Delete Log">
-                            <span class="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } else {
-            tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-16 text-center"><div class="flex flex-col items-center justify-center text-slate-300"><span class="material-symbols-outlined text-4xl mb-2">qr_code</span><p class="font-medium">No records logged for this date.</p></div></td></tr>`;
+        tbody.innerHTML = '';
+        if(displayList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="p-16 text-center text-slate-300">No records today.</td></tr>`;
+            return;
         }
+
+        displayList.forEach(att => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
+            tr.innerHTML = `
+                <td class="px-6 py-4 text-xs font-mono text-slate-400">${att.student_id}</td>
+                <td class="px-6 py-4 font-bold text-slate-900">${att.student_name}</td>
+                <td class="px-6 py-4 text-sm font-medium">
+                    <div class="flex flex-col">
+                        <span class="text-primary font-black">${att.subject || '-'}</span>
+                        <span class="text-[10px] text-slate-400 uppercase tracking-tighter">${att.prof_name || '-'}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-xs font-bold text-slate-500">${att.grade || '-'}</td>
+                <td class="px-6 py-4 text-sm font-black text-emerald-600">${att.check_in || '--:--'}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${att.status === 'Absent' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}">${att.status}</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="deleteAttendance('${att.id}')" class="text-slate-300 hover:text-red-500"><span class="material-symbols-outlined text-sm">delete</span></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
         
-        // Update record count if badge exists
         const countBadge = document.getElementById('log-count');
-        if (countBadge) countBadge.textContent = attendanceList.length;
+        if (countBadge) countBadge.textContent = displayList.length;
     }
 
-    window.updateOvertime = async function(id, val) {
-        let hrs = parseFloat(val) || 0;
-        try {
-            const { error } = await supabase.from('attendance').update({ overtime: hrs }).eq('id', id);
-            if (error) throw error;
-        } catch(err) {
-            alert("Error updating overtime: " + err.message);
-        }
+    window.deleteAttendance = async (id) => {
+        if (!confirm("Delete record?")) return;
+        await supabase.from('attendance').delete().eq('id', id);
+        loadAttendanceData();
     };
 
-    window.deleteAttendance = async function(id) {
-        if (confirm("Delete attendance record?")) {
-            try {
-                const { error } = await supabase.from('attendance').delete().eq('id', id);
-                if (error) throw error;
-                loadAttendanceData();
-            } catch (err) {
-                alert("Error deleting: " + err.message);
-            }
-        }
-    };
+    init();
 });

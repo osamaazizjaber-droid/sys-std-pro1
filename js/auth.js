@@ -96,7 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const universityName = document.getElementById('reg-university').value;
             const companyName = document.getElementById('reg-company').value;
+            const departmentName = document.getElementById('reg-department').value;
             const fullName = document.getElementById('reg-name').value;
             const position = document.getElementById('reg-position').value;
             const phone = document.getElementById('reg-phone').value;
@@ -112,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email,
                     password,
                     options: {
-                        data: { full_name: fullName, company_name: companyName } // Store metadata
+                        data: { full_name: fullName, company_name: companyName, university_name: universityName, department_name: departmentName } // Store metadata
                     }
                 });
 
@@ -121,15 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const userId = authData.user.id;
 
-                // Generate a unique short company code
+                // Generate a unique short college code (Stored in companies table for legacy compat)
                 const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
-                const companyCode = `COM-${randomString}`;
+                const collegeCode = `COL-${randomString}`;
 
                 // 2. Insert into Companies Table
                 const { error: insertError } = await sbClient.from('companies').insert({
                     id: userId,
-                    company_code: companyCode,
+                    company_code: collegeCode,
                     company_name: companyName,
+                    university_name: universityName,
+                    department_name: departmentName,
                     full_name: fullName,
                     position: position,
                     phone: phone,
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (insertError) {
                     console.error("Full Insert Error:", insertError);
-                    throw new Error("Failed to link company data. DB ERROR: " + insertError.message + " (Code: " + insertError.code + ")");
+                    throw new Error("Failed to link college data. DB ERROR: " + insertError.message + " (Code: " + insertError.code + ")");
                 }
 
                 // 3. Force sign out (because signUp usually signs them in automatically if email conf is off)
