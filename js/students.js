@@ -28,8 +28,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const searchInput = document.getElementById('search-students');
     const filterStage = document.getElementById('filter-stage');
+    const sortBtn = document.getElementById('sort-student-id');
+    const sortIcon = document.getElementById('sort-icon');
 
     let currentPhotoBase64 = "";
+    let sortColumn = 'student_id';
+    let sortAscending = false; // Default Z-A as requested (descending) or as per user "sort form A-Z or Z-A"
 
     // Load initial data
     await loadStudents();
@@ -183,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 query = query.eq('grade', stageFilter);
             }
 
-            const { data, error, count } = await query.order('student_id', { ascending: false });
+            const { data, error, count } = await query.order(sortColumn, { ascending: sortAscending });
 
             if (error) throw error;
 
@@ -530,6 +534,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (searchInput) searchInput.addEventListener('input', loadStudents);
     if (filterStage) filterStage.addEventListener('change', loadStudents);
+
+    if (sortBtn) {
+        sortBtn.addEventListener('click', () => {
+            sortAscending = !sortAscending;
+            if (sortIcon) {
+                sortIcon.textContent = sortAscending ? 'arrow_upward' : 'arrow_downward';
+                sortIcon.classList.remove('opacity-40');
+                sortIcon.classList.add('text-primary', 'opacity-100');
+            }
+            loadStudents();
+        });
+    }
 
     function updateBulkActionBar() {
         if (!bulkActionBar) return;
