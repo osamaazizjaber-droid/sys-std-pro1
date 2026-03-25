@@ -1,11 +1,11 @@
 {
-    "name": "WMS Scanner",
+    "name": "STD Scanner",
     "short_name": "Scanner",
-    "description": "SYS WMS Field Barcode Scanner",
-    "start_url": "./scanner.html",
+    "description": "SYS STD Field Barcode Scanner",
+    "start_url": "./stdscanner.html",
     "display": "standalone",
     "background_color": "#0f172a",
-    "theme_color": "#10b981",
+    "theme_color": "#f49000",
     "icons": [
         {
             "src": "favicon.png",

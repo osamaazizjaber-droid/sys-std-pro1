@@ -1,7 +1,7 @@
 {
-    "name": "SYS WMS Pro",
-    "short_name": "WMS Pro",
-    "description": "Comprehensive Worker Management System",
+    "name": "SYS STD Pro",
+    "short_name": "STD Pro",
+    "description": "Comprehensive Student Management System",
     "start_url": "./auth.html",
     "display": "standalone",
     "background_color": "#ffffff",
