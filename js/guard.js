@@ -19,12 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // 3. Verify Company Approval Status
-        // Even if they have a session token, they might have been rejected later.
+        // 3. Verify College Approval Status
         const userId = session.user.id;
         const { data: company, error: companyError } = await sbClient
-            .from('companies')
-            .select('status, company_code')
+            .from('colleges')
+            .select('status, college_code')
             .eq('id', userId)
             .single();
 
@@ -39,16 +38,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (company.status !== 'approved') {
-            // Company is pending or rejected. Revoke access immediately.
+            // College is pending or rejected. Revoke access immediately.
             await sbClient.auth.signOut();
-            alert("Security Notice: Your company account is not currently approved for access. Please contact administration.");
+            alert("Security Notice: Your college account is not currently approved for access. Please contact administration.");
             window.location.replace('auth.html');
             return;
         }
 
-        // 4. Attach Company Metadata to Window object for easy access across the app
-        window.WMS_COLLEGE_CODE = company.company_code;
-        window.WMS_COMPANY_ID = session.user.id;
+        // 4. Attach Metadata to Window object for easy access across the app
+        window.WMS_COLLEGE_CODE = company.college_code;
+        window.WMS_COLLEGE_ID = session.user.id;
 
     } catch (err) {
         console.error("Auth Guard encounter a critical error:", err);
