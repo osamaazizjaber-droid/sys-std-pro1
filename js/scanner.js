@@ -170,11 +170,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnNextStep.innerHTML = `<span class="material-symbols-outlined animate-spin text-base">sync</span> ${TRANSLATIONS[currentLang]['verifying']}`;
 
         try {
-            // 1. Verify Professor (using ilike for case-insensitivity)
-            const { data: prof, error: profErr } = await supabase.from('professors').select('prof_name').ilike('prof_id', pId).single();
-            if (profErr || !prof) throw new Error(TRANSLATIONS[currentLang]['invalid-prof']);
+            // 1. Verify Professor using RPC (handles college code, trimming, and case-insensitivity)
+            const { data: profRes, error: profErr } = await supabase.rpc('get_scanner_prof_info', {
+                p_college_code: code,
+                p_prof_id: pId
+            });
 
-            currentProfName = prof.prof_name;
+            if (profErr || !profRes || !profRes.valid) {
+                 const errMsg = profRes?.error || (profErr?.message) || TRANSLATIONS[currentLang]['invalid-prof'];
+                 throw new Error(errMsg);
+            }
+
+            currentProfName = profRes.prof_name;
             currentProfId = pId;
             currentCompanyCode = code;
 
