@@ -7,10 +7,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const userId = user.id;
-
     const attDateInput = document.getElementById('attendance-date');
     const attBarcodeInput = document.getElementById('attendance-barcode');
     const tbody = document.getElementById('attendance-tbody');
@@ -23,15 +19,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     let profsList = [];
     let allAssignments = []; 
 
-    async function init() {
+    let collegeId = window.WMS_COLLEGE_ID;
+
+    async function start() {
+        collegeId = window.WMS_COLLEGE_ID;
+        if (!collegeId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) collegeId = user.id;
+        }
+        if (!collegeId) return;
+
         await loadStudents();
         await loadProfessors();
         await loadAssignments();
         loadAttendanceData();
     }
 
+    if (window.WMS_COLLEGE_ID) {
+        start();
+    } else {
+        document.addEventListener('wms-auth-ready', start);
+        setTimeout(start, 2000);
+    }
+
     async function loadStudents() {
-        const { data } = await supabase.from('students').select('student_id, student_name, grade').eq('college_id', userId);
+        const { data } = await supabase.from('students').select('student_id, student_name, grade').eq('college_id', collegeId);
         if (data) {
             studentsList = data;
             if (gradeSelect) {
@@ -51,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadProfessors() {
-        const { data } = await supabase.from('professors').select('prof_id, prof_name').eq('college_id', userId);
+        const { data } = await supabase.from('professors').select('prof_id, prof_name').eq('college_id', collegeId);
         if (data && profSelect) {
             profsList = data;
             const lang = window.WMSSettings ? window.WMSSettings.get('lang') : 'en';
@@ -71,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadAssignments() {
-        const { data } = await supabase.from('subject_assignments').select('*, professors(prof_name)').eq('college_id', userId);
+        const { data } = await supabase.from('subject_assignments').select('*, professors(prof_name)').eq('college_id', collegeId);
         if (data) {
             allAssignments = data;
             updateSubjectDropdown();
@@ -149,8 +161,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function processAttendanceScan(code) {
         let student = studentsList.find(s => s.student_id === code || s.student_name.toLowerCase().includes(code.toLowerCase()));
+        
         if (!student) {
-            const { data } = await supabase.from('students').select('*').eq('college_id', userId).or(`student_id.eq.${code},student_name.ilike.%${code}%`).limit(1);
+            const currentAY = window.WMSSettings?.get('academic_year');
+            let query = supabase.from('students').select('*').eq('college_id', collegeId).or(`student_id.eq.${code},student_name.ilike.%${code}%`).limit(1);
+            if (currentAY) query = query.eq('academic_year', currentAY);
+            
+            const { data } = await query;
             if (data && data.length > 0) student = data[0];
         }
 
@@ -168,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const { data: existing } = await supabase.from('attendance')
                 .select('*')
-                .eq('college_id', userId)
+                .eq('college_id', collegeId)
                 .eq('student_id', student.student_id)
                 .eq('date', scanDate)
                 .eq('subject', subj);
@@ -177,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert(`${student.student_name} already logged for ${subj} today.`);
             } else {
                 await supabase.from('attendance').insert([{
-                    college_id: userId,
+                    college_id: collegeId,
                     student_id: student.student_id,
                     student_name: student.student_name,
                     prof_id: profId,
@@ -200,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadAttendanceData() {
         const scanDate = attDateInput.value;
         tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-300">Loading...</td></tr>`;
-        const { data } = await supabase.from('attendance').select('*').eq('college_id', userId).eq('date', scanDate).order('id', {ascending: false});
+        const { data } = await supabase.from('attendance').select('*').eq('college_id', collegeId).eq('date', scanDate).order('id', {ascending: false});
         attendanceList = data || [];
         renderAttendanceTable();
     }
@@ -246,9 +263,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.deleteAttendance = async (id) => {
         if (!confirm("Delete record?")) return;
-        await supabase.from('attendance').delete().eq('college_id', userId).eq('id', id);
+        await supabase.from('attendance').delete().eq('college_id', collegeId).eq('id', id);
         loadAttendanceData();
     };
 
     init();
+
+    // --- REAL-TIME SETTINGS SYNC ---
+    window.addEventListener('wms-settings-update', (e) => {
+        if (e.detail.k === 'academic_year') {
+            // New scans will now use the updated year
+            console.log("Attendance module synced to academic year:", e.detail.v);
+        }
+    });
 });

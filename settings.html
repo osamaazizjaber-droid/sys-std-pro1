@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"/>
   <link rel="stylesheet" href="css/themes.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/guard.js"></script>
   <script src="js/settings.js"></script>
   <style>
     body { font-family: var(--wms-font, 'Inter', sans-serif); }
@@ -72,28 +75,29 @@
 
 <body class="bg-surface font-body text-on-surface antialiased">
     <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
-        <header class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-surface-container-highest z-50">
+        <header class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 z-50 no-print shadow-sm">
             <div class="flex items-center gap-4">
-                <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain drop-shadow-md" src="logo.png" onerror="this.style.display='none';" />
-                <span class="text-xl font-black text-primary hidden sm:inline-block tracking-tight">SYS STD Pro</span>
+                <img alt="Logo" class="h-10 w-auto" src="logo.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmNDkwMDAiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMjAiIGZpbGw9IiNmZmYiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0Pjwvc3ZnPg=='" />
+                <span class="text-xl font-black text-[#f49000] hidden sm:inline-block tracking-tight">SYS STD Pro</span>
             </div>
-            <nav class="flex items-center gap-6">
+            <nav class="hidden md:flex items-center gap-6">
                 <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Students</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments & Schedule</a>
                 <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
                 <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
                 <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
                 <div data-wms-settings-wrapper style="position:relative;">
-                    <a href="settings.html" class="text-primary font-bold border-b-2 border-primary pb-1 text-sm flex items-center gap-1" data-i18n="settings">Settings</a>
+                    <a href="settings.html" class="text-[#f49000] font-bold border-b-2 border-[#f49000] pb-1 text-sm flex items-center gap-1" data-i18n="settings">Settings</a>
                 </div>
             </nav>
             <div class="flex items-center gap-2">
-                <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border border-outline-variant/30 text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors">
-                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
+                <button id="hdr-dark-btn" title="Toggle Dark Mode" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]" id="hdr-dark-icon">dark_mode</span>
                 </button>
-                <button id="hdr-dark-btn" title="Toggle Dark Mode" class="w-9 h-9 rounded-full flex items-center justify-center border border-outline-variant/30 text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors">
-                    <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+                <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
                 </button>
             </div>
         </header>
@@ -148,9 +152,24 @@
                         </div>
                     </div>
 
-                    <!-- 2. FONT PICKER -->
+                    <!-- 2. TYPOGRAPHY & SCALING -->
                     <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 shadow-sm">
-                        <h3 class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-4" data-i18n="font-section">Font</h3>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-on-surface-variant text-xs font-bold uppercase tracking-wider" data-i18n="typography-section">Typography & Scaling</h3>
+                            <span id="font-scale-value" class="text-sm font-black text-primary bg-primary/10 px-2 py-1 rounded-lg">100%</span>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm font-bold text-on-surface" data-i18n="font-size-label">Text Size (Global Scale)</p>
+                            </div>
+                            <input type="range" min="80" max="150" step="5" value="100" 
+                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" 
+                                id="font-scale-slider" oninput="updateFontScale(this.value)">
+                            <p class="text-[10px] text-on-surface-variant mt-2 font-medium" data-i18n="font-scaling-desc">Adjust the overall text size of the entire application.</p>
+                        </div>
+
+                        <h3 class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-4" data-i18n="font-section">System Font</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="font-grid">
                             <!-- Injected by JS -->
                         </div>
@@ -261,6 +280,12 @@ function setFont(name) {
   });
 }
 
+function updateFontScale(val) {
+  S.setFS(val);
+  document.getElementById('font-scale-value').textContent = val + '%';
+  document.getElementById('font-scale-slider').value = val;
+}
+
 function buildFontGrid() {
   const grid = document.getElementById('font-grid');
   grid.innerHTML = '';
@@ -359,11 +384,11 @@ function syncHdrDarkBtn() {
   document.getElementById('hdr-dark-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
 }
 
-document.getElementById('hdr-lang-btn').addEventListener('click', () => {
+document.getElementById('hdr-lang-btn')?.addEventListener('click', () => {
   setLang(S.get('lang') === 'en' ? 'ar' : 'en');
 });
 
-document.getElementById('hdr-dark-btn').addEventListener('click', () => {
+document.getElementById('hdr-dark-btn')?.addEventListener('click', () => {
   setDark(S.get('dark') === 'true' ? 'false' : 'true');
 });
 
@@ -374,17 +399,38 @@ document.addEventListener('DOMContentLoaded', () => {
   updateActiveDark();
   syncHdrDarkBtn();
   S.applyTranslations(S.get('lang'));
+  updateFontScale(S.get('font_scale'));
 
-  // Continually check for WMS_COMPANY_CODE loaded by guard.js
-  const codeCheck = setInterval(() => {
-     if(window.WMS_COLLEGE_CODE) {
-         document.getElementById('display-college-code').textContent = window.WMS_COLLEGE_CODE;
-         clearInterval(codeCheck);
-     }
-  }, 200);
-  
-  // Timeout fallback
-  setTimeout(() => clearInterval(codeCheck), 5000);
+  // Robust check for College Code with direct fetch fallback
+  async function updateCode() {
+    const el = document.getElementById('display-college-code');
+    const code = window.WMS_COLLEGE_CODE;
+    const cid = window.WMS_COLLEGE_ID;
+
+    if (code) { el.textContent = code; return true; }
+    
+    if (window.sbClient) {
+      try {
+        let targetId = cid;
+        if (!targetId) {
+          const { data: { user } } = await window.sbClient.auth.getUser();
+          if (user) targetId = user.id;
+        }
+
+        if (targetId) {
+          const { data: c } = await window.sbClient.from('colleges').select('college_code').eq('id', targetId).maybeSingle();
+          if (c && c.college_code) { 
+            window.WMS_COLLEGE_CODE = c.college_code;
+            el.textContent = c.college_code; 
+            return true; 
+          }
+        }
+      } catch(e) { console.warn("Settings: College code fetch failed", e); }
+    }
+    return false;
+  }
+  const codeCheck = setInterval(async () => { if (await updateCode()) clearInterval(codeCheck); }, 500);
+  setTimeout(() => clearInterval(codeCheck), 10000);
 });
 </script>
 </body>

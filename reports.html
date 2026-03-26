@@ -1,37 +1,29 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SYS STD Pro</title>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Official Reports - SYS STD Pro</title>
     <link rel="icon" type="image/png" href="favicon.png?v=8" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" href="css/themes.css"/>
+    <link rel="stylesheet" href="css/themes.css" />
     <script src="js/settings.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "tertiary-fixed-dim": "#8cceff",
-                        "error-container": "#ffdad6",
-                        "background": "#f8f9fa",
-                        "surface-container-highest": "#e1e3e4",
-                        "surface-container-high": "#e7e8e9",
-                        "surface-container": "#edeeef",
-                        "surface-container-low": "#f3f4f5",
+                        "primary": "#f49000",
                         "surface": "#f8f9fa",
-                        "primary": "#8b5000",
-                        "primary-container": "#f49000",
-                        "on-surface": "#191c1d",
-                        "on-background": "#191c1d",
-                        "error": "#ba1a1a"
+                        "on-surface": "#191c1d"
                     },
                     fontFamily: {
-                        "body": ["var(--wms-font)", "Inter", "sans-serif"]
+                        "body": ["var(--wms-font)", "Inter", "sans-serif"],
+                        "cairo": ["Cairo", "sans-serif"]
                     }
                 }
             }
@@ -39,345 +31,346 @@
     </script>
     <style>
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
         }
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(136, 115, 98, 0.1);
+
+        /* ── Formal Paper Document Styling ── */
+        .paper-document {
+            width: 100%;
+            max-width: 297mm; /* A4 Landscape width */
+            min-height: 210mm; /* A4 Landscape height */
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+            border-radius: 8px;
         }
-        
+
+        #report-document { position: relative; z-index: 10; }
+
+        .table-sticky-header th {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 20;
+            box-shadow: 0 1px 0 #e2e8f0;
+        }
+
+        /* Tab Active State Styling */
+        .tab-btn { position: relative; overflow: hidden; }
+        .tab-btn.active::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background-color: #f49000; border-radius: 4px 0 0 4px;
+        }
+
+        /* Shimmer */
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        .btn-shimmer {
+            position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shimmer 2.5s infinite; pointer-events: none;
+        }
+
+        /* Subject columns in table (Aesthetic from snippet) */
+        #matrix-table th.col-subject {
+            background: #fff7ed !important;
+            color: #92400e;
+            border-left: 1px solid #fed7aa;
+        }
+        #matrix-table td.col-subject {
+            text-align: center;
+            border-left: 1px solid #f8fafc;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           PRINT STYLES  —  the real PDF fix
+           Uses browser's native print engine:
+           • Full table renders (no canvas crop)
+           • Crisp vector text (no blurry rasterisation)
+           • Table header repeats on every printed page
+           • Clean landscape A4 layout
+        ═══════════════════════════════════════════════════ */
         @media print {
-            @page { size: landscape; margin: 10mm; }
-            header.sticky, .hide-on-print { display: none !important; }
-            
-            /* Destroy all fixed-width clipping masks so native print scaling maps the entire table organically */
-            body, main, .relative, .layout-container, .layout-content-container { 
-                background: white !important; 
-                display: block !important; 
-                width: auto !important; 
-                min-width: 0 !important;
-                max-width: none !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                height: auto !important; 
-                overflow: visible !important; 
+            @page {
+                size: A4 landscape;
+                margin: 12mm 10mm 12mm 10mm;
             }
-            .overflow-x-auto, .overflow-hidden {
-                overflow: visible !important; 
-                position: static !important;
-                width: auto !important;
+
+            /* Hide UI chrome */
+            header, aside, .no-print, #backToTop, #pdf-toast { display: none !important; }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
             }
-            .print-break { page-break-before: always !important; break-before: page !important; }
-            #print-report-header { display: block !important; }
-            
-            /* Squeeze the entire content to prevent columns from cutting off on A4 landscape */
-            table { font-size: 8px !important; width: 100% !important; page-break-inside: auto; border-collapse: collapse !important; }
-            thead { display: table-header-group !important; }
-            tfoot { display: table-footer-group !important; }
-            th, td { padding: 2px !important; min-width: 0 !important; width: auto !important; overflow-wrap: break-word; }
-            th:first-child, td:first-child { min-width: 70px !important; }
-            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
-            /* Target the specific Tailwind wrapper blocking scaling */
-            .w-48, .min-w-\[40px\], .w-10 { width: auto !important; min-width: 0 !important; max-width: none !important; }
-            
-            /* Ensure the metrics grid prints nicely in a row */
-            .grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 10px !important; zoom: 0.8; }
-            .bg-white { border: 1px solid #ddd !important; box-shadow: none !important; }
+
+            #main-content-area {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+            .paper-document {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+                min-height: unset !important;
+                border: none !important;
+            }
+
+            /* Unstick the header so the full table scrolls out */
+            #matrix-table th { position: static !important; box-shadow: none !important; }
+
+            /* Repeat thead on every printed page */
+            #matrix-table thead { display: table-header-group !important; }
+            #matrix-table tbody { display: table-row-group !important; }
+            #matrix-table       { page-break-inside: auto; border-collapse: collapse; }
+            #matrix-table tr    { page-break-inside: avoid; page-break-after: auto; }
+
+            /* Make overflow containers transparent to print */
+            .overflow-x-auto, #report-table-wrap { overflow: visible !important; }
+
+            /* Keep signature block together */
+            #signature-section { page-break-inside: avoid; margin-top: 16mm; }
+
+            /* Summary bar */
+            #report-summary { page-break-inside: avoid; }
         }
+
+        /* Custom PDF Toast */
+        #pdf-toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: #191c1d; color: #fff; padding: 14px 24px; border-radius: 14px;
+            font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35); z-index: 100000;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            opacity: 0; pointer-events: none; white-space: nowrap;
+        }
+        #pdf-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-spinner {
+            width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #f49000; animation: pdf-spin 0.7s linear infinite;
+        }
+        .toast-check {
+            width: 18px; height: 18px; border-radius: 50%; background: #10b981;
+            display: none; align-items: center; justify-content: center; font-size: 11px;
+        }
+        @keyframes pdf-spin { to { transform: rotate(360deg); } }
     </style>
-
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f49000">
-    <link rel="apple-touch-icon" href="favicon.png">
-    <script>
-        if ('serviceStudent' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceStudent.register('sw.js').catch(err => console.log('ServiceStudent registration failed: ', err));
-            });
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/reports.js" defer></script>
 </head>
+
 <body class="bg-surface text-on-surface antialiased font-body">
-    <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
-        <div class="layout-container flex h-full grow flex-col">
+    <div class="flex flex-col min-h-screen">
 
-            <!-- Top Navigation Bar -->
-            <header class="w-full bg-white border-b border-surface-variant px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-                <div class="flex items-center gap-3 text-on-surface">
-                    <div class="h-16 w-auto flex items-center">
-                        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain" src="logo.png" />
-                    </div>
-                    <h2 class="text-xl font-black tracking-tighter text-primary">SYS STD Pro</h2>
+        <!-- Standardized Top Navigation -->
+        <header class="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 no-print shadow-sm transition-colors duration-300">
+            <div class="flex items-center gap-4">
+                <img alt="Logo" class="h-10 w-auto" src="logo.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmNDkwMDAiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMjAiIGZpbGw9IiNmZmYiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0Pjwvc3ZnPg=='" />
+                <span class="text-xl font-black text-[#8b5000] dark:text-[#f49000] hidden sm:inline-block tracking-tight">SYS STD Pro</span>
+            </div>
+            <nav class="hidden md:flex items-center gap-6">
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Students</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments & Schedule</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
+                <a class="text-[#f49000] font-bold border-b-2 border-[#f49000] dark:border-[#f49000] pb-1 text-sm" href="reports.html" data-i18n="reports">Reports</a>
+                <div data-wms-settings-wrapper style="position:relative;">
+                    <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" data-i18n="settings">Settings</button>
                 </div>
-                <nav class="flex items-center gap-6">
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-                    <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="reports.html" data-i18n="reports">Reports</a>
-                    <div data-wms-settings-wrapper style="position:relative;">
-                      <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
-                        <span data-i18n="settings" data-i18n="settings">Settings</span>
-                        <span class="material-symbols-outlined" style="font-size:16px;line-height:1;">expand_more</span>
-                      </button>
-                    </div>
-                </nav>
-                <div class="flex items-center gap-2">
-                  <button id="hdr-lang-btn" title="Toggle Language"
-                    class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border"
-                    style="border-color:var(--clr-border,#e9ecef);color:var(--clr-text-muted,#6c757d);background:var(--clr-surface-2,#f1f3f5);">
+            </nav>
+            <div class="flex items-center gap-2">
+                <button id="hdr-dark-btn" title="Toggle Dark Mode" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]" id="hdr-dark-icon">dark_mode</span>
+                </button>
+                <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
-                  </button>
-                  <button id="hdr-dark-btn" title="Toggle Dark Mode"
-                    class="w-9 h-9 rounded-full flex items-center justify-center border"
-                    style="background:var(--clr-surface-2,#f1f3f5);color:var(--clr-text-muted,#6c757d);border-color:var(--clr-border,#e9ecef);">
-                    <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
-                  </button>
-                </div>
-            </header>
+                </button>
+            </div>
+        </header>
 
-            <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
-                <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0 hide-on-print">
-                    <div>
-                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="reports-title">Student Attendance Metrics</h2>
-                        <p class="text-sm text-on-surface-variant mt-1"><span data-i18n="reports-sub">Operational audit for</span> <span id="date-range-display" class="font-bold text-on-surface">Loading...</span></p>
-                    </div>
+        <!-- New Layout Split -->
+        <div class="flex-1 flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
+            
+            <!-- ── LEFT SIDEBAR (Controls) ── -->
+            <aside id="sidebar-controls" class="w-full md:w-[340px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 md:sticky md:top-0 h-auto md:h-[calc(100vh-73px)] overflow-y-auto custom-scrollbar z-40 shadow-[4px_0_24px_rgba(0,0,0,0.02)] no-print transition-colors duration-300">
+                <div class="p-6 space-y-8">
                     
-                    <div class="flex flex-col gap-4 w-full mt-4 bg-surface-container-lowest border border-outline-variant/30 p-2 rounded-2xl shadow-sm">
-                        <!-- Top Toolbar Tier: Dates & Grouping -->
-                        <div class="flex flex-wrap items-center justify-between gap-4 w-full bg-surface-container-low p-2 rounded-xl border border-outline-variant/20">
-                            <div class="flex items-center bg-white p-1 rounded-lg border border-outline-variant/30 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
-                                <div class="flex flex-col px-3 border-r border-outline-variant/30">
-                                    <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="start-date">Date Range Start</label>
-                                    <input type="date" id="report-start-date" class="border-none bg-transparent text-sm font-semibold text-slate-800 focus:ring-0 p-0 m-0 outline-none cursor-pointer">
-                                </div>
-                                <div class="flex flex-col px-3">
-                                    <label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant" data-i18n="end-date">Date Range End</label>
-                                    <input type="date" id="report-end-date" class="border-none bg-transparent text-sm font-semibold text-slate-800 focus:ring-0 p-0 m-0 outline-none cursor-pointer">
-                                </div>
-                            </div>
-                            
-                            <select id="report-group-by" class="bg-primary text-white border-none text-sm font-bold rounded-lg px-4 py-2.5 outline-none shadow-md cursor-pointer hover:bg-primary-dark transition-colors appearance-none min-w-[200px]">
-                                <option value="NONE" data-i18n="ungrouped" class="bg-white text-slate-800">Ungrouped (Flat)</option>
-                                <option value="grade" data-i18n="group-by-grade" class="bg-white text-slate-800">Group by Grade</option>
-                            </select>
+                    <!-- Tab Selection -->
+                    <div>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 pl-1 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> <span data-i18n="report-type">Report Type</span>
+                        </h2>
+                        <div class="flex flex-col gap-2 p-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                            <button id="tab-daily" onclick="switchTab('daily')" class="tab-btn active w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-200 dark:border-slate-700 transition-all">
+                                <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">today</span></div>
+                                <span class="text-sm" data-i18n="daily-matrix">Daily Matrix</span>
+                            </button>
+                            <button id="tab-weekly" onclick="switchTab('weekly')" class="tab-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all border border-transparent">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">date_range</span></div>
+                                <span class="text-sm" data-i18n="weekly-audit">Weekly Audit</span>
+                            </button>
+                            <button id="tab-monthly" onclick="switchTab('monthly')" class="tab-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all border border-transparent">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">calendar_month</span></div>
+                                <span class="text-sm" data-i18n="monthly-summary">Monthly Summary</span>
+                            </button>
                         </div>
-                        
-                        <!-- Bottom Toolbar Tier: Filters & Actions -->
-                        <div class="flex flex-wrap items-center justify-between gap-4 w-full px-2 pb-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <select id="report-filter-grade" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
-                                    <option value="ALL" data-i18n="all-grades">All Grades</option>
-                                </select>
-                                <select id="report-filter-subject" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
-                                    <option value="ALL" data-i18n="all-subjects">All Subjects</option>
-                                </select>
-                                <select id="report-filter-prof" class="bg-white border border-outline-variant/40 text-sm font-bold rounded-lg px-4 py-2 text-slate-700 outline-none shadow-sm cursor-pointer hover:border-slate-400 transition-colors">
-                                    <option value="ALL" data-i18n="all-profs">All Professors</option>
+                    </div>
+
+                    <div class="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+
+                    <!-- Filter Parameters -->
+                    <div>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 pl-1 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> <span data-i18n="parameters">Parameters</span>
+                        </h2>
+
+                        <div class="space-y-5">
+                            <div id="filter-date-wrapper">
+                                <label class="block text-xs font-bold text-slate-700 mb-2" data-i18n="ref-date">Reference Date</label>
+                                <div class="flex flex-col gap-2">
+                                    <input id="report-start-date" type="date" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-1 focus:ring-primary text-slate-800 dark:text-slate-200 shadow-sm cursor-pointer transition-all hover:border-slate-400 dark:hover:border-slate-600" />
+                                    <div id="report-end-date-wrapper" style="display: none;" class="relative">
+                                        <div class="absolute -top-3 left-6 bg-white px-2 text-[10px] font-bold text-slate-400 uppercase">To Date</div>
+                                        <input id="report-end-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 cursor-not-allowed opacity-70" readonly />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="filter-search-wrapper">
+                                <label class="block text-xs font-bold text-slate-700 mb-2" data-i18n="search-workers">Search Students</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                                    <input id="report-search-input" type="text" data-i18n-placeholder="search-students" placeholder="Search by name or ID..." class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary shadow-sm hover:border-slate-400 dark:hover:border-slate-600 transition-all" />
+                                </div>
+                            </div>
+
+                            <div id="filter-stage-wrapper">
+                                <label class="block text-xs font-bold text-slate-700 mb-2" data-i18n="teaching-stage">Academic Stage</label>
+                                <select id="report-filter-grade" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary appearance-none shadow-sm cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition-all">
+                                    <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                                    <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                                    <option value="المرحلة الثانية - الصباحي" selected>المرحلة الثانية - الصباحي</option>
+                                    <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                                    <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                                    <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                                    <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                                    <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
                                 </select>
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-3">
-                                <label class="flex items-center gap-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg cursor-pointer hover:bg-rose-100 transition-colors shadow-sm">
-                                    <input type="checkbox" id="at-risk-filter" class="w-4 h-4 text-rose-600 rounded focus:ring-rose-500 border-rose-300">
-                                    <span class="text-xs font-black tracking-wider text-rose-700 uppercase whitespace-nowrap" data-i18n="at-risk-only">At-Risk Only</span>
-                                </label>
-
-                                <div class="w-px h-6 bg-outline-variant/50 mx-1 hidden sm:block"></div>
-
-                                <button id="btnRunReport" class="px-5 py-2 hover:-translate-y-0.5 bg-white text-slate-700 rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-slate-200 shadow-sm hover:shadow-md">
-                                    <span class="material-symbols-outlined text-[18px]">sync</span> <span data-i18n="run-report">Compute</span>
-                                </button>
-                                <button id="btnExportCsv" class="px-5 py-2 hover:-translate-y-0.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg text-sm font-bold shadow-sm hover:shadow-md shadow-emerald-500/20 flex items-center gap-2 transition-all">
-                                    <span class="material-symbols-outlined text-[18px]">download</span> <span data-i18n="export-csv">Export CSV</span>
-                                </button>
-                                <button id="btnPrintReport" class="px-5 py-2 hover:-translate-y-0.5 bg-gradient-to-r from-primary to-primary-container text-white rounded-lg text-sm font-bold shadow-sm hover:shadow-md shadow-primary/20 flex items-center gap-2 transition-all">
-                                    <span class="material-symbols-outlined text-[18px]">print</span> <span data-i18n="export-pdf">Export PDF</span>
-                                </button>
-                            </div>
+                            <button id="btnRunReport" class="w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white px-4 py-4 rounded-xl font-black tracking-wide shadow-lg shadow-slate-900/20 transition-all active:scale-95 flex justify-center items-center gap-2 uppercase text-xs">
+                                <span class="material-symbols-outlined text-[18px]">sync</span>
+                                <span data-i18n="generate-matrix">Generate Matrix</span>
+                            </button>
                         </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ── RIGHT CONTENT (Document Viewer) ── -->
+            <main id="main-content-area" class="flex-1 min-w-0 p-4 md:p-8 lg:p-12 overflow-y-auto h-auto md:h-[calc(100vh-73px)] bg-slate-200/80 dark:bg-slate-900/50 relative custom-scrollbar transition-colors duration-300">
+
+                <header class="mb-8 max-w-[297mm] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4 no-print">
+                    <div>
+                        <h1 class="text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-3">
+                            <span data-i18n="official-registry">Official Registry</span>
+                            <span id="badge-tab-name" class="px-3 py-1 bg-primary/10 text-primary text-sm rounded-lg uppercase tracking-widest border border-primary/20">Daily</span>
+                        </h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="btnPrintReport" class="relative flex items-center gap-2 bg-slate-900 px-6 py-2.5 rounded-lg text-white font-bold shadow-lg shadow-slate-900/30 hover:bg-slate-800 hover:-translate-y-0.5 transition-all">
+                            <span class="btn-shimmer"></span>
+                            <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                            <span data-i18n="export-pdf">Export PDF</span>
+                        </button>
                     </div>
                 </header>
 
-                <div class="flex-1 overflow-y-auto w-full p-6 lg:p-8">
-                    <div class="layout-content-container flex flex-col w-full max-w-[1400px] mx-auto flex-1 gap-8">
+                <!-- ── FORMAL ACADEMIC PAPER VIEWER ── -->
+                <div class="paper-document flex flex-col print-container" id="printable-area">
+                    
+                    <div id="report-document" class="px-6 py-10 md:px-12 flex-1 flex flex-col">
+                        
+                        <!-- Official Institutional Header -->
+                        <div class="flex justify-between items-center pb-6 border-b-[3px] border-slate-900 mb-8">
+                            <div class="text-left space-y-1">
+                                <h2 id="hdr-univ-en" class="text-lg font-black text-slate-900 tracking-wider uppercase" data-i18n="university-anbar">University of Anbar</h2>
+                                <h3 id="hdr-coll-en" class="text-[11px] font-bold text-slate-500 tracking-wider uppercase" data-i18n="college-science">College of Science</h3>
+                                <div id="hdr-dept-en" class="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Department of Information Technology</div>
+                            </div>
+                            
+                            <div class="flex flex-col items-center pl-10 shrink-0">
+                                <div id="hdr-secondary-logo-container" class="w-16 h-16 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center mb-2 overflow-hidden shadow-sm print:border-slate-400">
+                                    <span class="material-symbols-outlined text-3xl text-slate-300">school</span>
+                                </div>
+                                <span id="hdr-logo-sub" class="text-[10px] font-black text-primary uppercase tracking-[0.15em]">SYS STD PRO</span>
+                            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 mb-8">
-                <div class="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-students">Total Students</p>
-                    <h3 id="kpi-total-students" class="text-2xl font-black text-on-surface">...</h3>
-                    <div class="flex items-center gap-1 text-emerald-600 text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">groups</span> <span data-i18n="active-roster">Registered in System</span>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-days">Active Days in Period</p>
-                    <h3 id="kpi-total-days" class="text-2xl font-black text-on-surface">...</h3>
-                    <div class="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">calendar_month</span> <span id="kpi-date-range" data-i18n="loading-period">Loading Period...</span>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="total-attendances">Total Attendances</p>
-                    <h3 id="kpi-attendances" class="text-2xl font-black text-on-surface">...</h3>
-                    <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">fact_check</span> <span data-i18n="records">Logs captured</span>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-2">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="avg-rate">Attendance Rate</p>
-                    <h3 id="kpi-rate" class="text-2xl font-black text-emerald-600">...</h3>
-                    <p class="text-[10px] text-slate-400 font-bold" data-i18n="avg-rate-desc">Overall average across period</p>
-                </div>
-            </div>
+                            <div class="text-right font-cairo space-y-1">
+                                <h2 id="hdr-univ-ar" class="text-xl font-black text-slate-900" data-i18n="university-anbar">جامعة الانبار</h2>
+                                <h3 id="hdr-coll-ar" class="text-sm font-bold text-slate-500" data-i18n="college-science">كلية العلوم</h3>
+                                <div id="hdr-dept-ar" class="text-[11px] font-bold text-slate-400 tracking-tight">قسم تكنولوجيا المعلومات</div>
+                            </div>
+                        </div>
 
-            <!-- Print-Only Report Header -->
-            <div class="hidden print:block border-b-2 border-primary pb-4 mb-2" style="display:none;" id="print-report-header">
-                <h2 class="text-2xl font-black text-slate-900" data-i18n="print-report-title">SYS STD Pro &mdash; Student Attendance Report</h2>
-                <p class="text-sm text-slate-500 mt-1"><span data-i18n="reporting-period">Reporting Period:</span> <strong id="print-period-display" class="text-slate-800">—</strong></p>
-            </div>
+                        <!-- Report Title & Metadata Pill (Sync with Ref Snippet) -->
+                        <div class="text-center mb-8">
+                            <h1 id="rpt-title" class="text-2xl font-black text-slate-900 tracking-tight uppercase mb-3" data-i18n="daily-attendance-report">Daily Attendance Report</h1>
+                            <div class="inline-flex flex-wrap items-center justify-center gap-3 bg-slate-50 border border-slate-100 rounded-full px-10 py-2 shadow-sm min-w-[320px]">
+                                <span id="rpt-date-val" class="text-[11px] font-bold text-slate-600 uppercase tracking-widest">—</span>
+                                <span class="text-slate-300 text-[11px]">|</span>
+                                <span id="rpt-stage" class="text-[11px] font-bold text-slate-600 uppercase tracking-widest font-cairo">—</span>
+                                <span id="rpt-subject-count" class="hidden md:inline-flex items-center gap-1"></span>
+                            </div>
+                        </div>
 
-            <!-- Detailed Attendance Matrix -->
-            <section class="space-y-4 print-break">
-                <div class="flex items-center justify-between">
-                    <h4 class="text-lg font-bold flex items-center gap-2 text-on-surface">
-                        <span class="w-2 h-6 bg-primary rounded-full"></span>
-                        <span data-i18n="attendance-matrix">Attendance Heatmap Matrix</span>
-                    </h4>
-                    <div class="flex flex-wrap items-center gap-4 text-xs">
-                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> <span data-i18n="present">Present</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span> <span data-i18n="on-leave">On Leave</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-error"></span> <span data-i18n="absent">Absent</span></div>
-                    </div>
-                </div>
-                
+                        <!-- Table Matrix -->
+                        <div class="overflow-x-auto z-10 relative custom-scrollbar flex-1 w-full pb-10">
+                            <table id="matrix-table" class="w-full text-left border-collapse border border-slate-200 text-[11px] rounded-lg">
+                                <thead class="table-sticky-header">
+                                    <tr id="matrix-head" class="border-b border-slate-200">
+                                        <!-- Header injected via JS -->
+                                    </tr>
+                                </thead>
+                                <tbody id="matrix-tbody" class="divide-y divide-slate-100">
+                                    <!-- Body injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
 
-                <!-- Trend Analytics Chart -->
-                <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] mb-6 p-6 border border-slate-100 hidden" id="chart-container">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-sm font-black text-on-surface uppercase tracking-wider flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-[20px]">insights</span>
-                            <span data-i18n="attendance-trends">Attendance Trends</span>
-                        </h4>
-                    </div>
-                    <div class="w-full h-[250px]">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>
-
-                <div id="original-matrix-wrapper" class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-center border-collapse">
-                            <thead>
-                                <tr id="matrix-head" class="bg-slate-50 border-b border-slate-200">
-                                    <th class="p-4 text-[10px] font-black uppercase text-on-surface tracking-tighter text-left sticky left-0 bg-slate-100 z-10 w-48 shadow-[2px_0_5px_rgba(0,0,0,0.02)]" data-i18n="student-name">Student Name</th>
-                                    <!-- Dynamic Days Header Injected Here -->
-                                </tr>
-                            </thead>
-                            <tbody id="matrix-tbody" class="divide-y divide-slate-50">
-                                <!-- Matrix Injected Here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <div class="h-10"></div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
-    <script src="js/guard.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/reports.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const S = window.WMSSettings;
-      if (!S) return;
-      function syncUI() {
-        const langLabel = document.getElementById('hdr-lang-label');
-        const darkIcon  = document.getElementById('hdr-dark-icon');
-        if (langLabel) langLabel.textContent = S.get('lang').toUpperCase();
-        if (darkIcon) darkIcon.textContent = S.get('dark') === 'true' ? 'light_mode' : 'dark_mode';
-      }
-      document.getElementById('hdr-lang-btn')?.addEventListener('click', () => { S.set('lang', S.get('lang') === 'en' ? 'ar' : 'en'); syncUI(); });
-      document.getElementById('hdr-dark-btn')?.addEventListener('click', () => { S.set('dark', S.get('dark') === 'true' ? 'false' : 'true'); syncUI(); });
-      syncUI();
-    });
-    </script>
-
-    <!-- Individual Student Record Modal -->
-    <div id="studentModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="studentModalContent">
-            
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 print:hidden">
-                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">person</span>
-                    <span data-i18n="student-record">Term Report Card</span>
-                </h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="printStudentModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">print</span>
-                    </button>
-                    <button onclick="closeStudentModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">close</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="p-6 overflow-y-auto" id="studentModalPrintArea">
-                <div class="flex gap-4 items-start mb-6">
-                    <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-2xl" id="modal-initial">?</div>
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900" id="modal-name">Student Name</h2>
-                        <p class="text-sm font-bold text-slate-400 font-mono tracking-widest mt-1" id="modal-id">ID: 12345</p>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-center">
-                        <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1" data-i18n="present">Present</p>
-                        <h4 class="text-2xl font-black text-emerald-700" id="modal-p">0</h4>
-                    </div>
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center">
-                        <p class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1" data-i18n="on-leave">Leave</p>
-                        <h4 class="text-2xl font-black text-amber-700" id="modal-l">0</h4>
-                    </div>
-                    <div class="bg-rose-50 p-4 rounded-xl border border-rose-100 text-center">
-                        <p class="text-xs font-bold text-rose-600 uppercase tracking-widest mb-1" data-i18n="absent">Absent</p>
-                        <h4 class="text-2xl font-black text-rose-700" id="modal-a">0</h4>
-                    </div>
-                </div>
-                
-                <h4 class="text-xs font-black uppercase text-slate-500 tracking-widest border-b border-slate-100 pb-2 mb-3"><span data-i18n="absence-history">Absence & Leave History</span></h4>
-                <div class="bg-slate-50 rounded-xl border border-slate-100 p-2 overflow-hidden">
-                    <table class="w-full text-left border-collapse" id="modal-history-table">
-                        <thead class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                            <tr><th class="p-2 border-b border-slate-200">Date</th><th class="p-2 border-b border-slate-200">Status</th><th class="p-2 border-b border-slate-200">Subject</th><th class="p-2 border-b border-slate-200">Professor</th></tr>
-                        </thead>
-                        <tbody class="text-xs font-medium text-slate-700 divide-y divide-slate-100" id="modal-history-body">
-                            <!-- Injected rows -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-        </div>
+    <!-- ── PDF Progress Toast ── -->
+    <div id="pdf-toast">
+        <div class="toast-spinner" id="toast-spinner"></div>
+        <div class="toast-check" id="toast-check">✓</div>
+        <span id="toast-msg">Compiling High-Density PDF…</span>
     </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 z-[100] w-12 h-12 rounded-full bg-primary text-white shadow-lg flex items-center justify-center translate-y-20 opacity-0 pointer-events-none transition-all duration-500 hover:scale-110 active:scale-95 no-print">
+        <span class="material-symbols-outlined">arrow_upward</span>
+    </button>
 
 </body>
 </html>

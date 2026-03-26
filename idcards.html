@@ -115,39 +115,36 @@
 </head>
 <body class="bg-background text-on-background font-body h-screen flex flex-col overflow-hidden">
 
-<!-- Standard App Header -->
-<header class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-surface-container-highest z-50">
+<!<!-- Standard App Header -->
+<header class="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 no-print shadow-sm transition-colors duration-300">
     <div class="flex items-center gap-4">
-        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain drop-shadow-md" src="logo.png" onerror="this.style.display='none';" />
-        <span class="text-xl font-black text-primary hidden sm:inline-block tracking-tight">SYS STD Pro</span>
+        <img alt="Logo" class="h-10 w-auto" src="logo.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmNDkwMDAiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMjAiIGZpbGw9IiNmZmYiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0Pjwvc3ZnPg=='" />
+        <span class="text-xl font-black text-[#8b5000] dark:text-[#f49000] hidden sm:inline-block tracking-tight">SYS STD Pro</span>
     </div>
-    <nav class="flex items-center gap-6">
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
-        <a class="text-orange-500 font-bold border-b-2 border-orange-500 pb-1 text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
-        <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
-        <div data-wms-settings-wrapper style="position:relative;">
-          <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
-            <span data-i18n="settings" data-i18n="settings">Settings</span>
-            <span class="material-symbols-outlined" style="font-size:16px;line-height:1;">expand_more</span>
-          </button>
-        </div>
-    </nav>
+                    <nav class="hidden md:flex items-center gap-6">
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Students</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments & Schedule</a>
+                    <a class="text-[#f49000] font-bold border-b-2 border-[#f49000] pb-1 text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
+                    <div data-wms-settings-wrapper style="position:relative;">
+                        <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" data-i18n="settings">Settings</button>
+                    </div>
+                </nav>
     <div class="flex items-center gap-2">
-      <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border" style="border-color:var(--clr-border,#e9ecef);color:var(--clr-text-muted,#6c757d);background:var(--clr-surface-2,#f1f3f5);">
-        <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
-      </button>
-      <button id="hdr-dark-btn" title="Toggle Dark Mode" class="w-9 h-9 rounded-full flex items-center justify-center border" style="background:var(--clr-surface-2,#f1f3f5);color:var(--clr-text-muted,#6c757d);border-color:var(--clr-border,#e9ecef);">
-        <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
-      </button>
+        <button id="hdr-dark-btn" title="Toggle Dark Mode" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+            <span class="material-symbols-outlined text-[20px]" id="hdr-dark-icon">dark_mode</span>
+        </button>
+        <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+            <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
+        </button>
     </div>
 </header>
 
-<main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
-    <header class="px-8 py-6 border-b border-surface-container flex justify-between items-center bg-surface-container-lowest flex-shrink-0">
+<main class="flex-1 flex flex-col h-full bg-surface dark:bg-slate-950 overflow-hidden transition-colors duration-300">
+    <header class="px-8 py-6 border-b border-surface-container dark:border-slate-800 flex justify-between items-center bg-surface-container-lowest dark:bg-slate-900 flex-shrink-0">
         <div>
             <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="idcard-title">ID Card Generation</h2>
             <p class="text-sm text-on-surface-variant mt-1" data-i18n="idcard-sub">Batch process and print student identification cards.</p>
@@ -179,14 +176,6 @@
                     <span class="material-symbols-outlined text-on-surface-variant text-lg">filter_list</span>
                     <select id="filter-stage" class="w-full bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary cursor-pointer outline-none shadow-sm">
                         <option value="all" data-i18n="all-stages">All Stages</option>
-                        <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
-                        <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
-                        <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
-                        <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
-                        <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
-                        <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
-                        <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
-                        <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
                     </select>
                 </div>
             </div>
@@ -220,9 +209,13 @@
                 
                 <!-- Top Accent Header Block -->
                 <div id="card-header" class="h-[52px] w-full flex items-center justify-between px-3 relative shrink-0 transition-colors duration-300" style="background-color: #f49000;">
-                    <h2 class="text-white font-bold text-[14px] tracking-[0.2em] uppercase w-full">SYS STD PRO</h2>
                     <div class="size-9 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-sm shrink-0 border-[1.5px] border-white">
                         <img class="w-full h-full object-cover p-[2px]" src="logo.png" alt="Logo">
+                    </div>
+                    <h2 id="card-inst-title" class="text-white font-bold text-[13px] tracking-[0.1em] uppercase text-center absolute left-1/2 -translate-x-1/2 truncate w-[160px]">SYS STD PRO</h2>
+                    <div id="card-secondary-logo-container" class="size-9 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-sm shrink-0 border-[1.5px] border-white">
+                        <span id="card-secondary-placeholder" class="material-symbols-outlined text-[20px] text-[#f49000]">school</span>
+                        <img id="card-secondary-logo" class="w-full h-full object-cover p-[2px] hidden" src="" alt="Secondary Logo">
                     </div>
                 </div>
                 
@@ -303,19 +296,12 @@
     <script src="js/guard.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/idcards.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const S = window.WMSSettings;
-    if (!S) return;
-    function syncUI() { 
-        const ll = document.getElementById('hdr-lang-label'), di = document.getElementById('hdr-dark-icon');
-        if (ll) ll.textContent = S.get('lang').toUpperCase(); 
-        if (di) di.textContent = S.get('dark') === 'true' ? 'light_mode' : 'dark_mode'; 
-    }
-    document.getElementById('hdr-lang-btn')?.addEventListener('click', () => { S.set('lang', S.get('lang') === 'en' ? 'ar' : 'en'); syncUI(); });
-    document.getElementById('hdr-dark-btn')?.addEventListener('click', () => { S.set('dark', S.get('dark') === 'true' ? 'false' : 'true'); syncUI(); });
-    syncUI();
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const S = window.WMSSettings;
+            if (!S) return;
+            S.rebuild(); 
+        });
+    </script>
 </body>
 </html>

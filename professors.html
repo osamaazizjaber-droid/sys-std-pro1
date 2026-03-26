@@ -1,213 +1,504 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SYS STD Pro</title>
-    <link rel="icon" type="image/png" href="favicon.png?v=8" />
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Professors Management - SYS STD Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" href="css/themes.css"/>
-    <script src="js/settings.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "tertiary-fixed-dim": "#8cceff",
-                        "error-container": "#ffdad6",
-                        "background": "#f8f9fa",
-                        "surface-container-highest": "#e1e3e4",
-                        "surface-container-high": "#e7e8e9",
-                        "surface-container": "#edeeef",
-                        "surface-container-low": "#f3f4f5",
+                        "primary": "#f49000",
                         "surface": "#f8f9fa",
-                        "primary": "#8b5000",
-                        "primary-container": "#f49000",
-                        "on-surface": "#191c1d",
-                        "on-background": "#191c1d",
-                        "error": "#ba1a1a"
+                        "on-surface": "#191c1d"
                     },
                     fontFamily: {
-                        "body": ["var(--wms-font)", "Inter", "sans-serif"]
+                        "body": ["Inter", "sans-serif"],
+                        "arabic": ["Cairo", "sans-serif"]
                     }
-                }
-            }
+                },
+            },
         }
     </script>
+    
     <style>
+        body { background-color: #f3f4f6; transition: background-color 0.3s, color 0.3s; } 
+        .dark body { background-color: #020617; }
+        
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
         }
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    </style>
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
 
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f49000">
-    <link rel="apple-touch-icon" href="favicon.png">
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
-            });
+        /* Glass Card Utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s;
         }
-    </script>
-</head>
-<body class="bg-surface text-on-surface antialiased font-body">
-    <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
-        <div class="layout-container flex h-full grow flex-col">
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
 
-            <!-- Top Navigation Bar -->
-            <header class="w-full bg-white border-b border-surface-variant px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-                <div class="flex items-center gap-3 text-on-surface">
-                    <div class="h-16 w-auto flex items-center">
-                        <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain" src="logo.png" />
-                    </div>
-                    <h2 class="text-xl font-black tracking-tighter text-primary">SYS STD Pro</h2>
-                </div>
-                <nav class="flex items-center gap-6">
+        /* Table Styles */
+        .data-table { border-collapse: separate; border-spacing: 0; width: 100%; transition: all 0.3s; }
+        .data-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.70rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 800;
+            padding: 1rem;
+            border-bottom: 2px solid #cbd5e1;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        .dark .data-table th {
+            background-color: #1e293b;
+            color: #94a3b8;
+            border-bottom-color: #334155;
+        }
+        .data-table td {
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            padding: 0.875rem 1rem;
+            background-color: #ffffff;
+            transition: background-color 0.15s ease, border-color 0.3s;
+        }
+        .dark .data-table td {
+            background-color: #0f172a;
+            border-bottom-color: #1e293b;
+        }
+        .data-table tbody tr:hover td {
+            background-color: #f8fafc;
+        }
+        .dark .data-table tbody tr:hover td {
+            background-color: #1e293b;
+        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        /* Checkbox styling */
+        .wms-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background-color: white;
+        }
+        .dark .wms-checkbox {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+        .wms-checkbox:checked {
+            background-color: #f49000;
+            border-color: #f49000;
+        }
+        .wms-checkbox:checked::after {
+            content: 'check';
+            font-family: 'Material Symbols Outlined';
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 800;
+        }
+
+        /* Modal Overrides */
+        .dark #edit-prof-modal .bg-white { background-color: #1e293b !important; color: #f1f5f9; }
+        .dark #edit-prof-modal .bg-slate-50 { background-color: #0f172a !important; border-color: #334155 !important; }
+        .dark #edit-prof-modal .border-slate-100 { border-color: #334155 !important; }
+        .dark #edit-prof-modal input, .dark #edit-prof-modal select { 
+            background-color: #0f172a !important; 
+            border-color: #334155 !important; 
+            color: #f1f5f9 !important; 
+        }
+
+        /* Toast Notifications */
+        #toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #191c1d;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 99999;
+        }
+        #toast.show { bottom: 32px; }
+
+        /* Button shimmer animation */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .btn-shimmer-effect { position: relative; overflow: hidden; }
+        .btn-shimmer-effect::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shimmer 2.2s infinite; pointer-events: none;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="favicon.png?v=8" />
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="text-slate-800 dark:text-slate-200 antialiased font-body min-h-screen flex flex-col custom-scrollbar">
+    
+    <!-- Top Navigation Bar -->
+    <header class="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 no-print shadow-sm transition-colors duration-300">
+        <div class="flex items-center gap-4">
+            <img alt="Logo" class="h-10 w-auto" src="logo.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmNDkwMDAiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMjAiIGZpbGw9IiNmZmYiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0Pjwvc3ZnPg=='" />
+            <span class="text-xl font-black text-[#8b5000] dark:text-[#f49000] hidden sm:inline-block tracking-tight">SYS STD Pro</span>
+        </div>
+                        <nav class="hidden md:flex items-center gap-6">
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Student Management</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Students</a>
+                    <a class="text-[#f49000] font-bold border-b-2 border-[#f49000] pb-1 text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments & Schedule</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
-                    <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="professors.html" data-i18n="professors">Professors</a>
-                    <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
                     <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
                     <div data-wms-settings-wrapper style="position:relative;">
-                      <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1" style="background:none;border:none;cursor:pointer;">
-                        <span data-i18n="settings" data-i18n="settings">Settings</span>
-                        <span class="material-symbols-outlined" style="font-size:16px;line-height:1;">expand_more</span>
-                      </button>
+                        <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" data-i18n="settings">Settings</button>
                     </div>
                 </nav>
-                <div class="flex items-center gap-2">
-                  <button id="hdr-lang-btn" title="Toggle Language"
-                    class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border"
-                    style="border-color:var(--clr-border,#e9ecef);color:var(--clr-text-muted,#6c757d);background:var(--clr-surface-2,#f1f3f5);">
-                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
-                  </button>
-                  <button id="hdr-dark-btn" title="Toggle Dark Mode"
-                    class="w-9 h-9 rounded-full flex items-center justify-center border"
-                    style="background:var(--clr-surface-2,#f1f3f5);color:var(--clr-text-muted,#6c757d);border-color:var(--clr-border,#e9ecef);">
-                    <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
-                  </button>
-                </div>
-            </header>
+        <div class="flex items-center gap-2">
+            <button id="hdr-dark-btn" title="Toggle Dark Mode" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+                <span class="material-symbols-outlined text-[20px]" id="hdr-dark-icon">dark_mode</span>
+            </button>
+            <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+                <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
+            </button>
+        </div>
+    </header>
 
-            <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
-                <header class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0">
+    <main class="flex-1 max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+        
+        <!-- Header & Top Actions -->
+        <div class="flex flex-wrap gap-4 justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="professors-tab-title">Professors Management</h2>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="bg-orange-50 dark:bg-orange-900/20 text-[#f49000] px-3 py-1 rounded-full text-xs font-bold border border-orange-200/60 dark:border-orange-500/30 shadow-sm flex items-center gap-1.5 transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">person_4</span>
+                        <span id="kpi-total-professors">Loading...</span> <span data-i18n="active-staff">Active Staff</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 no-print">
+                <button id="btn-export-csv" class="flex cursor-pointer items-center justify-center rounded-xl h-[42px] px-5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-all shadow-sm text-sm font-bold gap-2">
+                    <span class="material-symbols-outlined text-[18px] text-[#10b981]">download</span>
+                    <span data-i18n="export-csv">Export CSV</span>
+                </button>
+                <div class="relative group">
+                    <button id="btn-import-csv" class="flex cursor-pointer items-center justify-center rounded-xl h-[42px] px-5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-all shadow-sm text-sm font-bold gap-2 group-hover:border-[#f49000]/50">
+                        <span class="material-symbols-outlined text-[18px] text-[#f49000]">upload_file</span>
+                        <span data-i18n="import-csv">Import CSV</span>
+                    </button>
+                    <input type="file" id="import-csv-file" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Import Professor Data">
+                </div>
+            </div>
+        </div>
+
+        <!-- New Professor Onboarding Card -->
+        <div id="onboarding-section" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 lg:p-8 no-print flex flex-col md:flex-row gap-8 items-center lg:items-end transition-colors duration-300">
+            
+            <!-- Photo Upload Area -->
+            <div class="flex-shrink-0 flex flex-col items-center gap-2">
+                <div class="relative group">
+                    <div class="size-24 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 group-hover:border-[#f49000] group-hover:text-[#f49000] group-hover:bg-orange-50 dark:group-hover:bg-orange-950/20 transition-all cursor-pointer overflow-hidden relative shadow-sm">
+                        <div id="photo-placeholder-icon" class="flex flex-col items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-3xl mb-1">add_a_photo</span>
+                        </div>
+                        <img id="photo-preview-img" class="absolute inset-0 w-full h-full object-cover hidden" />
+                        <input id="prof-photo-input" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" type="file" accept="image/*" />
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 bg-slate-800 text-white size-7 rounded-full flex items-center justify-center shadow-md border-2 border-white pointer-events-none">
+                        <span class="material-symbols-outlined text-[14px]">edit</span>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1" data-i18n="photo">Photo</span>
+            </div>
+
+            <!-- Form Area -->
+            <form id="professor-form" class="flex-1 w-full space-y-4">
+                <h3 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-[#f49000]">person_add</span>
+                    <span data-i18n="add-professor">Register New Professor</span>
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="space-y-1.5 md:col-span-2 lg:col-span-1">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="prof-title-label">Full Name & Title</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">badge</span>
+                            <input id="prof-name-input" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all" placeholder="e.g. Dr. Ahmed Hassan" data-i18n-placeholder="prof-name-placeholder" type="text" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="prof-specialization">Specialization / Subject</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">menu_book</span>
+                            <input id="prof-subject-input" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all" placeholder="e.g. Computer Science" data-i18n-placeholder="prof-subject-placeholder" type="text" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="teaching-stage">Grade / Stage</label>
+                        <div class="relative">
+                            <select id="prof-stage-input" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-10 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all appearance-none cursor-pointer">
+                                <option value="" disabled selected data-i18n="select-stage">Select Stage...</option>
+                                <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                                <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                                <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                                <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                                <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                                <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                                <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                                <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                                <option value="All Stages" data-i18n="all-stages-general">All Stages (General)</option>
+                            </select>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Submit Button -->
+            <div class="flex-shrink-0 w-full lg:w-auto">
+                <button type="submit" form="professor-form" id="btn-save-professor" class="btn-shimmer-effect bg-[#8b5000] bg-gradient-to-r from-[#8b5000] to-[#f49000] text-white h-[46px] px-8 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 w-full lg:w-auto">
+                    <span class="material-symbols-outlined text-[20px]">person_add</span>
+                    <span data-i18n="add-professor">Add Professor</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 z-20 transition-colors duration-300">
+            <div class="relative w-full md:w-[400px]">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                <input type="text" id="search-professors" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 pl-12 pr-4 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-200 focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] shadow-sm outline-none transition-all placeholder:font-normal" data-i18n-placeholder="search-professors" placeholder="Search by name or subject...">
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="flex flex-col w-full md:w-auto">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">filter_list</span>
+                        <select id="filter-stage" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm font-bold focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] shadow-sm outline-none min-w-[200px] w-full md:w-auto appearance-none cursor-pointer">
+                            <option value="all" data-i18n="all-stages">All Stages Overview</option>
+                            <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                            <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                            <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                            <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                            <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                            <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                            <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                            <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                        </select>
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Action Bar (For Professors) -->
+        <div id="bulk-action-bar" class="hidden bg-slate-800 dark:bg-slate-900 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between shadow-xl transition-all border border-slate-700 dark:border-slate-800">
+            <div class="flex items-center gap-4 mb-4 sm:mb-0">
+                <div class="bg-[#f49000] text-white size-8 rounded-full flex items-center justify-center font-black text-sm shadow-sm" id="bulk-selected-count">1</div>
+                <span class="text-sm font-bold text-slate-300 tracking-wide">Professors Selected</span>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <button id="btn-bulk-delete" class="flex-1 sm:flex-none bg-[#ef4444]/20 text-[#ef4444] hover:bg-[#ef4444] hover:text-white px-4 py-2 rounded-xl font-bold text-xs transition-all border border-[#ef4444]/30 uppercase tracking-wider flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">delete</span> <span>Remove Selected</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex-1 transition-colors duration-300">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="w-16 text-center">
+                                <input type="checkbox" id="selectAllProfessors" class="wms-checkbox mx-auto">
+                            </th>
+                            <th class="w-32 cursor-pointer group/sort" id="sort-prof-id">
+                                <div class="flex items-center gap-1">
+                                    <span data-i18n="prof-id">Prof ID</span>
+                                    <span id="sort-icon" class="material-symbols-outlined text-[16px] opacity-40 group-hover/sort:opacity-100 transition-opacity">swap_vert</span>
+                                </div>
+                            </th>
+                            <th data-i18n="prof-name">Photo & Name</th>
+                            <th data-i18n="subject">Subject / Specialization</th>
+                            <th data-i18n="teaching-stage">Grade / Stage</th>
+                            <th class="text-right" data-i18n="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="professors-tbody">
+                        <!-- Dynamic Rows Populated By professors.js -->
+                        <tr><td colspan="6" class="py-16 text-center text-slate-400 font-medium">
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <span class="material-symbols-outlined text-4xl animate-spin text-[#f49000]">sync</span> 
+                                <span class="text-sm font-bold tracking-widest uppercase" data-i18n="loading-professors">Loading Database...</span>
+                            </div>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Edit Professor Modal -->
+    <div id="edit-prof-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+            
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#f49000]">manage_accounts</span> Edit Professor
+                </h3>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-700 bg-white size-8 rounded-full border border-slate-200 flex items-center justify-center transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-5">
+                <input type="hidden" id="edit-prof-id">
+
+                <div class="flex items-center gap-5 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div class="relative group size-20 rounded-2xl bg-white border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden hover:border-[#f49000] transition-colors">
+                        <img id="edit-photo-preview" class="absolute inset-0 w-full h-full object-cover hidden" />
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-[#f49000]">add_a_photo</span>
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white text-[18px]">edit</span>
+                        </div>
+                        <input id="edit-photo-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" type="file" accept="image/*" />
+                    </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="professors-tab-title">Professors Management</h2>
-                        <p class="text-sm text-on-surface-variant mt-1" data-i18n="professors-tab-sub">Track and manage university professors.</p>
-                    </div>
-                </header>
-
-                <div class="flex-1 overflow-y-auto w-full p-6 lg:p-8">
-                    <div class="layout-content-container flex flex-col w-full max-w-[1200px] mx-auto flex-1 gap-6">
-                        
-                        <!-- Onboarding Section (Inline Form) -->
-                        <div id="onboarding-section" class="bg-gradient-to-br from-orange-50/50 to-white border border-orange-200/60 rounded-xl p-4 mb-2 flex flex-col md:flex-row gap-6 items-center shadow-sm">
-                            <div class="flex-shrink-0 relative group cursor-pointer" onclick="document.getElementById('prof-photo-input').click()">
-                                <input type="file" id="prof-photo-input" accept="image/*" class="hidden">
-                                <div id="photo-preview-box" class="size-16 rounded-xl bg-white border border-orange-200 flex items-center justify-center text-primary shadow-sm overflow-hidden group-hover:border-primary transition-all">
-                                    <span id="photo-placeholder-icon" class="material-symbols-outlined text-3xl">add_a_photo</span>
-                                    <img id="photo-preview-img" class="hidden w-full h-full object-cover">
-                                </div>
-                                <div class="absolute -bottom-1 -right-1 bg-primary text-white size-5 rounded-full flex items-center justify-center shadow-sm border border-white">
-                                    <span class="material-symbols-outlined text-[12px]">edit</span>
-                                </div>
-                            </div>
-
-                            <form id="professor-form" class="flex-1 flex flex-col md:flex-row gap-4 w-full items-end">
-                                <div class="flex-1 space-y-2 w-full">
-                                    <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block" data-i18n="prof-name">Professor Name</label>
-                                    <div class="relative group">
-                                        <div class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 pointer-events-none text-base">badge</div>
-                                        <input type="text" id="prof-name-input" placeholder="Full Name..." data-i18n-placeholder="prof-name" autocomplete="off"
-                                            class="w-full bg-white border border-slate-200 rounded-lg ps-10 pe-3 py-2 text-sm font-bold text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary/10 transition-all outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="flex-shrink-0 w-full md:w-auto">
-                                    <button type="submit" id="btn-save-professor" class="w-full md:w-auto bg-primary text-white h-[38px] px-6 rounded-lg font-bold text-sm shadow-sm hover:shadow-md hover:bg-orange-600 transition-all flex items-center justify-center gap-2">
-                                        <span class="material-symbols-outlined text-base">add_circle</span>
-                                        <span data-i18n="add-professor">إضافة أستاذ</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-lg font-bold flex items-center gap-2 text-on-surface">
-                                <span class="w-2 h-6 bg-primary rounded-full"></span>
-                                <span data-i18n="professors-list">Professors Directory</span>
-                            </h4>
-
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <button id="btn-export-csv" class="flex cursor-pointer items-center justify-center rounded-xl h-10 px-4 bg-surface hover:bg-surface-container border border-outline-variant/30 text-on-surface-variant transition-all shadow-sm text-sm font-bold gap-2 group">
-                                <span class="material-symbols-outlined text-base group-hover:text-primary transition-colors">download</span>
-                                <span data-i18n="export-csv">Export CSV</span>
-                            </button>
-                            <div class="relative">
-                                <button id="btn-import-csv" class="flex cursor-pointer items-center justify-center rounded-xl h-10 px-4 bg-surface hover:bg-surface-container border border-outline-variant/30 text-on-surface-variant transition-all shadow-sm text-sm font-bold gap-2 group">
-                                    <span class="material-symbols-outlined text-base group-hover:text-primary transition-colors">upload</span>
-                                    <span data-i18n="import-csv">Import CSV</span>
-                                </button>
-                                <input type="file" id="import-csv-file" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            </div>
-                        </div>
-
-                        </div>
-
-                        <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100">
-                            <div class="overflow-x-auto custom-scrollbar">
-                                <table class="w-full text-start border-collapse">
-                                    <thead>
-                                        <tr class="bg-slate-50 border-b border-slate-200">
-                                            <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="prof-id">ID</th>
-                                            <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="prof-name">Name</th>
-                                            
-                                            <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="subject" data-i18n="subject">Subject</th>
-                                            <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter" data-i18n="teaching-stage" data-i18n="teaching-stage">Teaching Stage</th>
-                                            <th class="p-4 text-[10px] font-black uppercase text-slate-500 tracking-tighter text-end" data-i18n="actions">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="professors-tbody" class="divide-y divide-slate-50">
-                                        <tr><td colspan="5" class="p-12 text-center text-slate-400 font-bold tracking-widest"><span class="material-symbols-outlined animate-spin text-3xl mb-2">sync</span><br><span data-i18n="loading-professors">Loading Professors...</span></td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
+                        <p class="text-sm font-bold text-slate-800">Profile Photo</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Click to upload a new image. (Optional)</p>
                     </div>
                 </div>
-            </main>
+
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Full Name & Title</label>
+                        <input id="edit-prof-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all" type="text" />
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Subject / Specialization</label>
+                            <input id="edit-prof-subject" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all" type="text" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Grade / Stage</label>
+                            <div class="relative">
+                                <select id="edit-prof-stage" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-8 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-[#f49000] focus:ring-1 focus:ring-[#f49000] transition-all appearance-none cursor-pointer">
+                                    <option value="" disabled>Select Stage</option>
+                                    <option value="المرحلة الاولى - الصباحي">المرحلة الاولى - الصباحي</option>
+                                    <option value="المرحلة الاولى - المسائي">المرحلة الاولى - المسائي</option>
+                                    <option value="المرحلة الثانية - الصباحي">المرحلة الثانية - الصباحي</option>
+                                    <option value="المرحلة الثانية - المسائي">المرحلة الثانية - المسائي</option>
+                                    <option value="المرحلة الثالثة - الصباحي">المرحلة الثالثة - الصباحي</option>
+                                    <option value="المرحلة الثالثة - المسائي">المرحلة الثالثة - المسائي</option>
+                                    <option value="المرحلة الرابعة - الصباحي">المرحلة الرابعة - الصباحي</option>
+                                    <option value="المرحلة الرابعة - المسائي">المرحلة الرابعة - المسائي</option>
+                                    <option value="All Stages">All Stages</option>
+                                </select>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-5 border-t border-slate-100 bg-white flex justify-end gap-3 rounded-b-2xl">
+                <button id="btn-cancel-edit" class="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                <button id="btn-save-edit" class="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md hover:bg-black transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">save</span> Save Changes
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Toast Component -->
+    <div id="toast">
+        <span class="material-symbols-outlined text-[#10b981]" id="toast-icon">check_circle</span>
+        <span id="toast-msg">Operation successful</span>
+    </div>
+
+    <!-- Supabase CDN and Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/guard.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/professors.js"></script>
     <script>
+    // Visual toggles for Modal (To be controlled by professors.js, adding safe defaults)
+    const modal = document.getElementById('edit-prof-modal');
+    const modalInner = modal ? modal.querySelector('.bg-white') : null;
+    
+    window.showEditModal = function() {
+        if(!modal) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalInner.classList.remove('scale-95');
+            modalInner.classList.add('scale-100');
+        }, 10);
+    }
+    
+    window.hideEditModal = function() {
+        if(!modal) return;
+        modal.classList.add('opacity-0');
+        modalInner.classList.remove('scale-100');
+        modalInner.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    document.getElementById('btn-close-modal')?.addEventListener('click', window.hideEditModal);
+    document.getElementById('btn-cancel-edit')?.addEventListener('click', window.hideEditModal);
+
     document.addEventListener('DOMContentLoaded', () => {
       const S = window.WMSSettings;
       if (!S) return;
-      function syncHeader() { 
-        const ll = document.getElementById('hdr-lang-label'), di = document.getElementById('hdr-dark-icon');
-        if (ll) ll.textContent = S.get('lang').toUpperCase(); 
-        if (di) di.textContent = S.get('dark') === 'true' ? 'light_mode' : 'dark_mode'; 
-      }
-      document.getElementById('hdr-lang-btn')?.addEventListener('click', () => { S.set('lang', S.get('lang') === 'en' ? 'ar' : 'en'); syncHeader(); });
-      document.getElementById('hdr-dark-btn')?.addEventListener('click', () => { S.set('dark', S.get('dark') === 'true' ? 'false' : 'true'); syncHeader(); });
-      syncHeader();
+      S.rebuild(); 
     });
     </script>
 </body>

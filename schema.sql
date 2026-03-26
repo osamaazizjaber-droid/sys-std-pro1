@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.colleges (
     phone text,
     email text unique not null,
     status text default 'pending',
+    settings jsonb default '{}',
     created_at timestamp with time zone default timezone('utc'::text, now())
 );
 

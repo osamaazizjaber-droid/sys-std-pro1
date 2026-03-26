@@ -22,12 +22,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cardBarcode = document.getElementById('card-barcode');
     
     let studentsData = [];
+    let collegeMetadata = null;
+    
+    // Auth Check & College Init
+    let collegeId = window.WMS_COLLEGE_ID;
+
+    async function start() {
+        collegeId = window.WMS_COLLEGE_ID;
+        if (!collegeId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) collegeId = user.id;
+        }
+        if (!collegeId) return;
+
+        await loadCollegeMetadata();
+        await loadStudents();
+        setupEventListeners();
+    }
+
+    if (window.WMS_COLLEGE_ID) {
+        start();
+    } else {
+        document.addEventListener('wms-auth-ready', start);
+        setTimeout(start, 2000);
+    }
+    
+    // Move logic inside a wrapper or just use the renamed variables
+
+    async function loadCollegeMetadata() {
+        const { data, error } = await supabase.from('colleges').select('*').eq('id', collegeId).single();
+        if (data) {
+            collegeMetadata = data;
+            const instTitle = document.getElementById('card-inst-title');
+            if (instTitle) {
+                instTitle.textContent = data.college_name || data.university_name || 'SYS STD PRO';
+            }
+            updateSecondaryLogoPreview();
+        }
+    }
+
+    function updateSecondaryLogoPreview() {
+        const placeholder = document.getElementById('card-secondary-placeholder');
+        const logoImg = document.getElementById('card-secondary-logo');
+        const accentColor = document.getElementById('card-header')?.style.backgroundColor || '#f49000';
+        
+        if (window.secondaryLogoDataURL) {
+            if (placeholder) placeholder.classList.add('hidden');
+            if (logoImg) {
+                logoImg.src = window.secondaryLogoDataURL;
+                logoImg.classList.remove('hidden');
+            }
+        } else {
+            if (logoImg) logoImg.classList.add('hidden');
+            if (placeholder) {
+                placeholder.classList.remove('hidden');
+                placeholder.innerHTML = `<span style="font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 900; color: ${accentColor}; letter-spacing: -0.05em; text-align: center;">${collegeMetadata?.college_code || 'COL-CODE'}</span>`;
+            }
+        }
+    }
     
     async function loadStudents() {
         try {
             const { data, error, count } = await supabase
                 .from('students')
                 .select('*', { count: 'exact' })
+                .eq('college_id', collegeId)
                 .neq('status', 'Graduated')
                 .order('student_name', { ascending: true });
                 
@@ -41,6 +100,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Auto-preview first student if available
             if (studentsData.length > 0) {
                 updatePreview(studentsData[0]);
+                
+                // Populate stage filter
+                const uniqueStages = [...new Set(studentsData.map(s => s.grade).filter(Boolean))].sort();
+                if (filterStage) {
+                    const lang = (window.WMSSettings && window.WMSSettings.get('lang')) || 'en';
+                    const allText = window.WMS_I18N[lang]['all-stages'] || 'All Stages';
+                    filterStage.innerHTML = `<option value="all">${allText}</option>`;
+                    uniqueStages.forEach(st => {
+                        const opt = document.createElement('option');
+                        opt.value = st; opt.textContent = st;
+                        filterStage.appendChild(opt);
+                    });
+                }
             }
         } catch (err) {
             console.error("Error loading students:", err);
@@ -209,9 +281,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="logo-container">
                             <img class="logo" src="logo.png" alt="Logo">
                         </div>
-                        <h2 class="app-title">SYS STD PRO</h2>
+                        <h2 class="app-title">${collegeMetadata?.college_name || 'SYS STD PRO'}</h2>
                         <div class="logo-container">
-                            ${window.secondaryLogoDataURL ? `<img class="logo" style="width:100%; height:100%; object-fit:contain;" src="${window.secondaryLogoDataURL}" alt="Secondary Logo">` : `<span style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: ${accentColor};">&#xe85e;</span>`}
+                            ${window.secondaryLogoDataURL ? `<img class="logo" style="width:100%; height:100%; object-fit:contain;" src="${window.secondaryLogoDataURL}" alt="Secondary Logo">` : `<span style="font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 900; color: ${accentColor}; letter-spacing: -0.05em; text-align: center;">${collegeMetadata?.college_code || 'COL-CODE'}</span>`}
                         </div>
                     </div>
                     
@@ -412,6 +484,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const cardHeader = document.getElementById('card-header');
             if(cardHeader) {
                 cardHeader.style.backgroundColor = color;
+                // Update placeholder text color as well
+                const placeholder = document.getElementById('card-secondary-placeholder');
+                if (placeholder && !window.secondaryLogoDataURL) {
+                    const textSpan = placeholder.querySelector('span');
+                    if (textSpan) textSpan.style.color = color;
+                }
             }
             
             // update selection active state
@@ -450,6 +528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Init Page
+    await loadCollegeMetadata();
     loadStudents();
 });
 
@@ -479,6 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (err) {
                         console.warn('Logo too large for localStorage', err);
                     }
+                    updateSecondaryLogoPreview();
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -489,7 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 window.secondaryLogoDataURL = null;
                 localStorage.removeItem('wms_secondary_logo');
+                updateSecondaryLogoPreview();
             }
         });
     }
+
+    // Expose updateSecondaryLogoPreview globally for the upload logic
+    window.updateSecondaryLogoPreview = updateSecondaryLogoPreview;
 });

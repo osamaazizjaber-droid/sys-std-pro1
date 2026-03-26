@@ -33,24 +33,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!company) {
-            // Assume admin or legacy account without a company profile
+            // Check if Admin session - allow viewing primary college data
+            const ADMIN_EMAILS = ['syscompany85@gmail.com', 'osama@syswms.com', 'osamaazizjaber@gmail.com'];
+            if (ADMIN_EMAILS.includes(session.user.email)) {
+                console.warn("WMS Guard: Admin account detected. Defaulting to first college record.");
+                const { data: firstCol } = await sbClient.from('colleges').select('id, college_code').limit(1).maybeSingle();
+                if (firstCol) {
+                    window.WMS_COLLEGE_ID = firstCol.id;
+                    window.WMS_COLLEGE_CODE = firstCol.college_code;
+                    document.dispatchEvent(new CustomEvent('wms-auth-ready'));
+                    return;
+                }
+            }
             return; 
         }
 
         if (company.status !== 'approved') {
-            // College is pending or rejected. Revoke access immediately.
             await sbClient.auth.signOut();
-            alert("Security Notice: Your college account is not currently approved for access. Please contact administration.");
+            alert("Security Notice: Your college account is not currently approved for access.");
             window.location.replace('auth.html');
             return;
         }
 
-        // 4. Attach Metadata to Window object for easy access across the app
+        // Standard College Session
+        window.WMS_COLLEGE_ID = userId;
         window.WMS_COLLEGE_CODE = company.college_code;
-        window.WMS_COLLEGE_ID = session.user.id;
+        
+        // Notify other scripts that auth metadata is ready
+        document.dispatchEvent(new CustomEvent('wms-auth-ready'));
 
     } catch (err) {
-        console.error("Auth Guard encounter a critical error:", err);
+        console.error("Auth Guard Error:", err);
         window.location.replace('auth.html');
     }
 });

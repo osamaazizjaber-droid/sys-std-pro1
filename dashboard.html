@@ -124,195 +124,165 @@
     </script>
 </head>
 
-<body class="bg-surface font-body text-on-surface antialiased">
-    <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface group/design-root overflow-x-hidden">
-        <header
-            class="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-surface-container-highest z-50">
+<body class="bg-surface dark:bg-slate-950 font-body text-on-surface dark:text-slate-200 antialiased transition-colors duration-300">
+    <div class="relative flex h-auto min-h-screen w-full flex-col bg-surface dark:bg-slate-950 overflow-x-hidden">
+        
+        <!-- Standard Top Navigation Bar -->
+        <header class="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 no-print shadow-sm transition-colors duration-300">
             <div class="flex items-center gap-4">
-                <img alt="SYS STD Pro Logo" class="h-10 w-auto object-contain drop-shadow-md"
-                    src="logo.png"
-                    onerror="this.style.display='none';" />
-                <span
-                    class="text-xl font-black text-primary hidden sm:inline-block tracking-tight">SYS
-                    STD Pro</span>
+                <img alt="Logo" class="h-10 w-auto" src="logo.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmNDkwMDAiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMjAiIGZpbGw9IiNmZmYiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0Pjwvc3ZnPg=='" />
+                <span class="text-xl font-black text-[#8b5000] dark:text-[#f49000] hidden sm:inline-block tracking-tight">SYS STD Pro</span>
             </div>
-            <nav class="flex items-center gap-6">
-                <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="dashboard.html"
-                    data-i18n="dashboard">Dashboard</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="students.html"
-                    data-i18n="students-mgmt">Student Management</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="idcards.html"
-                    data-i18n="idcards">ID Cards</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm"
-                    href="professors.html" data-i18n="professors">Professors</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm"
-                    href="assignments.html" data-i18n="assignments">Assignments</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm"
-                    href="attendance.html" data-i18n="attendance">Attendance</a>
-                <a class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm" href="reports.html"
-                    data-i18n="reports">Reports</a>
+            <nav class="hidden md:flex items-center gap-6">
+                <a class="text-[#f49000] font-bold border-b-2 border-[#f49000] pb-1 text-sm" href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="students.html" data-i18n="students-mgmt">Students</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="professors.html" data-i18n="professors">Professors</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="assignments.html" data-i18n="assignments">Assignments & Schedule</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="idcards.html" data-i18n="idcards">ID Cards</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="attendance.html" data-i18n="attendance">Attendance</a>
+                <a class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" href="reports.html" data-i18n="reports">Reports</a>
                 <div data-wms-settings-wrapper style="position:relative;">
-                    <button data-wms-settings-trigger
-                        class="text-slate-500 font-medium hover:text-slate-900 transition-colors text-sm flex items-center gap-1"
-                        style="background:none;border:none;cursor:pointer;">
-                        <span data-i18n="settings" data-i18n="settings">Settings</span>
-                        <span class="material-symbols-outlined" style="font-size:16px;line-height:1;">expand_more</span>
-                    </button>
+                    <button data-wms-settings-trigger class="text-slate-500 font-medium hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-sm" data-i18n="settings">Settings</button>
                 </div>
             </nav>
             <div class="flex items-center gap-2">
-                <button id="hdr-lang-btn" title="Toggle Language"
-                    class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border"
-                    style="border-color:var(--clr-border,#e9ecef);color:var(--clr-text-muted,#6c757d);background:var(--clr-surface-2,#f1f3f5);">
-                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span
-                        id="hdr-lang-label">EN</span>
+                <button id="hdr-dark-btn" title="Toggle Dark Mode" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+                    <span class="material-symbols-outlined text-[20px]" id="hdr-dark-icon">dark_mode</span>
                 </button>
-                <button id="hdr-dark-btn" title="Toggle Dark Mode"
-                    class="w-9 h-9 rounded-full flex items-center justify-center border"
-                    style="background:var(--clr-surface-2,#f1f3f5);color:var(--clr-text-muted,#6c757d);border-color:var(--clr-border,#e9ecef);">
-                    <span id="hdr-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+                <button id="hdr-lang-btn" title="Toggle Language" class="flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors no-print">
+                    <span class="material-symbols-outlined text-base">language</span>&nbsp;<span id="hdr-lang-label">EN</span>
                 </button>
             </div>
         </header>
-        <main class="flex-1 flex flex-col h-full bg-surface overflow-hidden">
-            <header
-                class="px-8 py-6 border-b border-surface-container flex flex-wrap gap-4 justify-between items-center bg-surface-container-lowest flex-shrink-0">
-                <div>
-                    <h2 class="text-2xl font-bold text-on-surface tracking-tight" data-i18n="dashboard">Dashboard</h2>
-                    <p class="text-sm text-on-surface-variant mt-1" data-i18n="quick-actions">Quick Actions</p>
-                </div>
-            </header>
 
-            <div class="flex-1 overflow-y-auto w-full p-6 lg:p-8">
-                <div class="layout-container flex flex-col max-w-[1440px] mx-auto w-full gap-8">
-                    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div
-                            class="flex flex-col gap-3 rounded-lg bg-surface-container-lowest p-6 shadow-[0_8px_24px_rgba(25,28,29,0.04)] border border-outline-variant/15 relative overflow-hidden group hover:shadow-[0_12px_32px_rgba(25,28,29,0.06)] transition-all">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
-                            <div class="flex justify-between items-start">
-                                <p class="text-on-surface-variant text-sm font-semibold uppercase tracking-[0.05em] font-label"
-                                    data-i18n="total-students">Total Students</p>
-                                <span class="material-symbols-outlined text-primary-container opacity-80"
-                                    data-icon="groups">local_library</span>
+        <main class="flex-1 flex flex-col h-full bg-surface dark:bg-slate-950 overflow-hidden transition-colors duration-300">
+            <div class="flex flex-col gap-10 p-4 md:p-10">
+                <div class="flex flex-wrap gap-10 justify-between items-center">
+                    <div class="flex flex-col gap-2">
+                        <h1 class="text-on-surface dark:text-slate-100 text-4xl font-black leading-tight tracking-[-0.033em] font-headline"
+                            data-i18n="dashboard-welcome">Welcome to SYS STD Pro</h1>
+                        <p class="text-on-surface-variant dark:text-slate-400 text-base font-medium leading-normal font-body"
+                            data-i18n="dashboard-sub">Manage your academic institution with excellence.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- KPI Section -->
+                    <section class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-300">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h3 class="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight" data-i18n="stage-distribution">Stage / Grade Distribution</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 uppercase tracking-widest" data-i18n="student-count-desc">Total Active Enrollment per Grade</p>
                             </div>
-                            <p id="kpi-total-students"
-                                class="text-on-surface font-headline text-[48px] font-bold leading-none tracking-[-0.02em] mt-2">
-                                ...</p>
-                            <div
-                                class="mt-2 text-xs font-medium text-secondary bg-surface-container-low w-fit px-2 py-1 rounded-full flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]"
-                                    data-icon="trending_up">school</span>
-                                <span data-i18n="active-roster">Active Roster</span>
+                            <div class="flex items-center gap-6">
+                                <div class="text-right">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter" data-i18n="total-students">Total Students</p>
+                                    <p id="kpi-total-students" class="text-3xl font-black text-primary leading-none mt-1">...</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center text-primary shadow-inner">
+                                    <span class="material-symbols-outlined text-[28px]">groups</span>
+                                </div>
                             </div>
                         </div>
-                        <div
-                            class="flex flex-col gap-3 rounded-lg bg-surface-container-lowest p-6 shadow-[0_8px_24px_rgba(25,28,29,0.04)] border border-outline-variant/15 relative overflow-hidden group hover:shadow-[0_12px_32px_rgba(25,28,29,0.06)] transition-all">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
-                            <div class="flex justify-between items-start">
-                                <p class="text-on-surface-variant text-sm font-semibold uppercase tracking-[0.05em] font-label"
-                                    data-i18n="present-today">Present Today</p>
-                                <span class="material-symbols-outlined text-secondary opacity-80"
-                                    data-icon="how_to_reg">how_to_reg</span>
+
+                        <!-- Chart Area -->
+                        <div id="stage-chart-container" class="space-y-6">
+                            <!-- Dynamically populated by JS (Horizontal Bars) -->
+                            <div class="flex items-center justify-center py-20 text-slate-300 dark:text-slate-700 animate-pulse flex-col gap-3">
+                                <span class="material-symbols-outlined text-4xl">analytics</span>
+                                <span class="text-sm font-bold tracking-widest uppercase">Calculating distribution...</span>
                             </div>
-                            <p id="kpi-present-today"
-                                class="text-on-surface font-headline text-[48px] font-bold leading-none tracking-[-0.02em] mt-2">
-                                ...</p>
                         </div>
-                        <div
-                            class="flex flex-col gap-3 rounded-lg bg-surface-container-lowest p-6 shadow-[0_8px_24px_rgba(25,28,29,0.04)] border border-outline-variant/15 relative overflow-hidden group hover:shadow-[0_12px_32px_rgba(25,28,29,0.06)] transition-all">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-tertiary"></div>
-                            <div class="flex justify-between items-start">
-                                <p class="text-on-surface-variant text-sm font-semibold uppercase tracking-[0.05em] font-label"
-                                    data-i18n="total-professors">Total Professors</p>
-                                <span class="material-symbols-outlined text-tertiary opacity-80"
-                                    data-icon="person_4">person_4</span>
-                            </div>
-                            <div class="flex items-baseline gap-2 mt-2">
-                                <p id="kpi-total-professors"
-                                    class="text-on-surface font-headline text-[48px] font-bold leading-none tracking-[-0.02em]">
-                                    ...</p>
-                            </div>
-                            <div
-                                class="mt-2 text-xs font-medium text-tertiary bg-tertiary-fixed w-fit px-2 py-1 rounded-full flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]" data-icon="work">work</span>
-                                <span data-i18n="active-professors">Active Staff</span>
-                            </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                             <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                <span data-i18n="live-status">System Operational</span>
+                             </div>
+                             <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">person_4</span>
+                                    <span id="kpi-total-professors">...</span>
+                                    <span data-i18n="professors">Professors</span>
+                                </div>
+                             </div>
                         </div>
                     </section>
                     <section
-                        class="flex flex-col gap-6 mt-4 bg-surface-container-low p-8 rounded-xl border border-surface-container-high shadow-inner">
-                        <h3 class="text-on-surface text-xl font-bold leading-tight tracking-[-0.015em] font-headline"
+                        class="flex flex-col gap-6 bg-slate-50 dark:bg-slate-900 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors duration-300">
+                        <h3 class="text-on-surface dark:text-slate-100 text-xl font-bold font-headline leading-tight tracking-[-0.015em]"
                             data-i18n="quick-actions">Quick Actions</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             <a href="students.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(244,144,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(244,144,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-primary-container/20 to-primary/5 p-4 rounded-2xl text-primary group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-primary-container group-hover:text-on-primary group-hover:shadow-[0_0_15px_rgba(244,144,0,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">local_library</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-primary transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-primary transition-colors"
                                     data-i18n="students">Students</h2>
                             </a>
 
                             <a href="idcards.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(84,96,103,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(84,96,103,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-secondary-container/50 to-secondary/10 p-4 rounded-2xl text-secondary group-hover:bg-gradient-to-br group-hover:from-secondary group-hover:to-secondary-fixed group-hover:text-on-secondary group-hover:shadow-[0_0_15px_rgba(84,96,103,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">badge</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-secondary transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-secondary transition-colors"
                                     data-i18n="idcards">ID Cards</h2>
                             </a>
 
                             <a href="professors.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(139,80,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(139,80,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-surface-tint/20 to-primary/10 p-4 rounded-2xl text-surface-tint group-hover:bg-gradient-to-br group-hover:from-surface-tint group-hover:to-primary-container group-hover:text-white group-hover:shadow-[0_0_15px_rgba(139,80,0,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">person_4</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-surface-tint transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-surface-tint transition-colors"
                                     data-i18n="professors">Professors</h2>
                             </a>
 
                             <a href="attendance.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(0,100,146,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(0,100,146,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-tertiary-container/20 to-tertiary/10 p-4 rounded-2xl text-tertiary group-hover:bg-gradient-to-br group-hover:from-tertiary group-hover:to-tertiary-container group-hover:text-on-tertiary group-hover:shadow-[0_0_15px_rgba(0,100,146,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">event_available</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-tertiary transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-tertiary transition-colors"
                                     data-i18n="attendance">Attendance</h2>
                             </a>
 
                             <a href="assignments.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(244,144,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(244,144,0,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-primary-container/20 to-primary/5 p-4 rounded-2xl text-primary group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-primary-container group-hover:text-on-primary group-hover:shadow-[0_0_15px_rgba(244,144,0,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">assignment_turned_in</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-primary transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-primary transition-colors"
                                     data-i18n="assignments">Assignments</h2>
                             </a>
 
                             <a href="reports.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(0,75,111,0.15)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(0,75,111,0.15)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-on-tertiary-fixed-variant/20 to-tertiary/10 p-4 rounded-2xl text-on-tertiary-fixed-variant group-hover:bg-gradient-to-br group-hover:from-on-tertiary-fixed-variant group-hover:to-tertiary group-hover:text-white group-hover:shadow-[0_0_15px_rgba(0,75,111,0.4)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">bar_chart</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-on-tertiary-fixed-variant transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-on-tertiary-fixed-variant transition-colors"
                                     data-i18n="reports">Reports</h2>
                             </a>
 
                             <a href="settings.html"
-                                class="flex flex-col gap-3 rounded-xl bg-surface-container-lowest p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(25,28,29,0.1)] hover:-translate-y-2 transition-all duration-300 border border-outline-variant/20 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
+                                class="flex flex-col gap-3 rounded-xl bg-white dark:bg-slate-800 p-6 items-center justify-center text-center shadow-sm hover:shadow-[0_12px_24px_rgba(25,28,29,0.1)] hover:-translate-y-2 transition-all duration-300 border border-slate-200 dark:border-slate-700 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 no-underline">
                                 <div
                                     class="bg-gradient-to-br from-surface-variant/50 to-surface-dim/20 p-4 rounded-2xl text-on-surface-variant group-hover:bg-gradient-to-br group-hover:from-on-surface-variant group-hover:to-inverse-surface group-hover:text-white group-hover:shadow-[0_0_15px_rgba(25,28,29,0.3)] group-hover:scale-110 transition-all duration-300">
                                     <span class="material-symbols-outlined text-[32px]">settings</span>
                                 </div>
-                                <h2 class="text-on-surface text-sm font-bold leading-tight font-headline group-hover:text-on-surface-variant transition-colors"
+                                <h2 class="text-on-surface dark:text-slate-200 text-sm font-bold leading-tight font-headline group-hover:text-on-surface-variant transition-colors"
                                     data-i18n="settings">Settings</h2>
                             </a>
+                        </div>
                     </section>
                 </div>
             </div>
@@ -329,15 +299,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const S = window.WMSSettings;
             if (!S) return;
-            function syncUI() {
-                const langLabel = document.getElementById('hdr-lang-label');
-                const darkIcon = document.getElementById('hdr-dark-icon');
-                if (langLabel) langLabel.textContent = S.get('lang').toUpperCase();
-                if (darkIcon) darkIcon.textContent = S.get('dark') === 'true' ? 'light_mode' : 'dark_mode';
-            }
-            document.getElementById('hdr-lang-btn')?.addEventListener('click', () => { S.set('lang', S.get('lang') === 'en' ? 'ar' : 'en'); syncUI(); });
-            document.getElementById('hdr-dark-btn')?.addEventListener('click', () => { S.set('dark', S.get('dark') === 'true' ? 'false' : 'true'); syncUI(); });
-            syncUI();
+            S.rebuild(); 
         });
     </script>
 </body>

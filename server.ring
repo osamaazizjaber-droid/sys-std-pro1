@@ -1,9 +1,12 @@
 load "sockets.ring"
 
-port = 8080
-cServer = "127.0.0.1"
+port = 7070
+cServer = "localhost"
 
-see "Starting SYS WMS Pro Web Server..." + nl
+see "========================================" + nl
+see "   SYS STD Pro - Academic Web Server   " + nl
+see "========================================" + nl
+see "Starting Server..." + nl
 sock = socket(AF_INET, SOCK_STREAM, 0)
 bind(sock, cServer, port)
 listen(sock, 5)

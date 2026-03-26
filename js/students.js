@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputName = document.getElementById('student-name');
     const inputPos = document.getElementById('student-grade');
     const inputYear = document.getElementById('student-academic-year');
-    const inputSal = document.getElementById('student-grade-hidden');
     const btnSubmit = document.getElementById('btn-submit-student');
 
     const searchInput = document.getElementById('search-students');
@@ -31,13 +30,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sortBtn = document.getElementById('sort-student-id');
     const sortIcon = document.getElementById('sort-icon');
 
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    const toastIconEl = document.getElementById('toast-icon');
+
+    let studentsData = [];
     let currentPhotoBase64 = "";
     let sortColumn = 'student_id';
-    let sortAscending = false; // Default Z-A as requested (descending) or as per user "sort form A-Z or Z-A"
+    let sortAscending = false; 
+
+    // --- HELPER: Toast Notifications ---
+    function showToast(message, type = 'success') {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = message;
+        
+        if (type === 'success') {
+            toastIconEl.textContent = 'check_circle';
+            toastIconEl.style.color = '#10b981';
+        } else {
+            toastIconEl.textContent = 'error';
+            toastIconEl.style.color = '#ef4444';
+        }
+        
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
     // Load initial data
     await loadStudents();
     populateAcademicYears();
+    populateStages();
+
+    function populateStages() {
+        // Collect existing stages and merge with defaults
+        const defaultStages = [
+            "المرحلة الاولى - الصباحي",
+            "المرحلة الاولى - المسائي",
+            "المرحلة الثانية - الصباحي",
+            "المرحلة الثانية - المسائي"
+        ];
+        const uniqueStages = [...new Set([...defaultStages, ...studentsData.map(s => s.grade).filter(Boolean)])].sort();
+        
+        const stageDropdowns = [
+            document.getElementById('student-grade'),
+            document.getElementById('edit-student-grade')
+        ];
+        const filterDropdown = document.getElementById('filter-stage');
+
+        if (filterDropdown) {
+            const lang = (window.WMSSettings && window.WMSSettings.get('lang')) || 'en';
+            const allText = (window.WMS_I18N[lang] && window.WMS_I18N[lang]['all-stages']) || 'All Stages Overview';
+            filterDropdown.innerHTML = `<option value="all">${allText}</option>`;
+            uniqueStages.forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st; opt.textContent = st;
+                filterDropdown.appendChild(opt);
+            });
+        }
+
+        stageDropdowns.forEach(dd => {
+            if (!dd) return;
+            const placeholder = dd.querySelector('option[disabled]')?.outerHTML || '';
+            dd.innerHTML = placeholder;
+            uniqueStages.forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st; opt.textContent = st;
+                dd.appendChild(opt);
+            });
+        });
+    }
 
     function populateAcademicYears() {
         const studentAY = document.getElementById('student-academic-year');
@@ -45,14 +106,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const editAY = document.getElementById('edit-student-academic-year');
         if (!studentAY || !targetAY) return;
 
-        const start = 2025;
-        const end = 2040;
-        let options = `<option value="" disabled selected data-i18n-placeholder="academic-year">Academic Year</option>`;
-        let targetOptions = `<option value="" disabled selected data-i18n-placeholder="academic-year">Target Year</option>`;
-        let editOptions = `<option value="" disabled selected>Academic Year</option>`;
+        const start = 2024;
+        const end = 2030;
+        let options = `<option value="" disabled selected data-i18n-placeholder="academic-year">Select Year...</option>`;
+        let targetOptions = `<option value="" disabled selected data-i18n="target-year-label">Target Year</option>`;
+        let editOptions = `<option value="" disabled selected>Select Year...</option>`;
 
         for (let y = start; y < end; y++) {
-            const val = `${y}-${y+1}`;
+            const val = `${y}/${y+1}`;
             options += `<option value="${val}">${val}</option>`;
             targetOptions += `<option value="${val}">${val}</option>`;
             editOptions += `<option value="${val}">${val}</option>`;
@@ -78,7 +139,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // Resize image dynamically (faster storage)
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 const MAX_WIDTH = 256;
@@ -87,11 +147,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 canvas.height = img.height * scaleSize;
                 
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                // Convert to compressed jpeg base64
                 currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
                 
-                // Show in UI
                 photoIcon.classList.add('hidden');
                 photoPreview.src = currentPhotoBase64;
                 photoPreview.classList.remove('hidden');
@@ -106,20 +163,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         const name = inputName.value.trim();
         const pos = inputPos.value;
         const year = inputYear ? inputYear.value : '';
-        const sal = 0;
 
         if (!name) {
-            alert("Please provide a valid Name!");
+            showToast("Please provide a valid Name!", "error");
             return;
         }
 
-        const btnText = btnSubmit.textContent;
-        btnSubmit.textContent = "Saving...";
+        const btnText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span><span>Enrolling...</span>`;
         btnSubmit.disabled = true;
 
         try {
             // Calculate Next Sequential ID
-            const { data: lastStudent, error: lastErr } = await supabase
+            const { data: lastStudent } = await supabase
                 .from('students')
                 .select('student_id')
                 .eq('college_id', userId)
@@ -131,9 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (lastStudent && lastStudent.length > 0) {
                 const lastId = lastStudent[0].student_id;
                 const match = lastId.match(/std(\d+)/);
-                if (match) {
-                    nextIdNum = parseInt(match[1]) + 1;
-                }
+                if (match) nextIdNum = parseInt(match[1]) + 1;
             }
             const nextId = "std" + String(nextIdNum).padStart(3, '0');
 
@@ -149,24 +203,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { error } = await supabase.from('students').insert([payload]);
             if (error) throw error;
 
-            alert("Student profile submitted successfully!");
+            showToast("Student profile enrolled successfully!");
             
             // clear form
             inputName.value = '';
-            inputPos.value = '';
-            if(inputYear) inputYear.value = '';
+            inputPos.selectedIndex = 0;
+            if(inputYear) inputYear.selectedIndex = 0;
             
             currentPhotoBase64 = "";
             if(photoInput) photoInput.value = "";
             photoPreview.classList.add('hidden');
             photoIcon.classList.remove('hidden');
 
-            await loadStudents(); // Reload
+            await loadStudents(); 
+            populateStages(); // Update filters if new stage added
         } catch (err) {
             console.error(err);
-            alert("Error adding student: " + err.message);
+            showToast("Error adding student: " + err.message, "error");
         } finally {
-            btnSubmit.textContent = btnText;
+            btnSubmit.innerHTML = btnText;
             btnSubmit.disabled = false;
         }
     });
@@ -188,13 +243,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const { data, error, count } = await query.order(sortColumn, { ascending: sortAscending });
-
             if (error) throw error;
+            studentsData = data || [];
 
-            // Filter by search term locally for responsiveness if data is already fetched
-            // OR we could do it in the query. Let's do it in the query if possible, 
-            // but Supabase .or() with ilike is complex for multiple columns.
-            // Since student lists are usually < 1000 per college, local filter is fine.
             let filteredData = data;
             if (searchTerm) {
                 filteredData = data.filter(s => 
@@ -203,45 +254,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                 );
             }
 
-            // Updated Stats KPI
             if (kpiTotalStudents) kpiTotalStudents.textContent = count || 0;
 
             tbody.innerHTML = '';
             if (filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">No students found matching your criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-400 font-medium">No results found</td></tr>`;
                 return;
             }
 
             filteredData.forEach(w => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-all group border-b border-transparent hover:border-slate-100 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-5px_rgba(0,0,0,0.06)] relative z-0 hover:z-10";
-
                 const photoSrc = w.photo_url && w.photo_url.startsWith('data:image') 
                     ? w.photo_url 
-                    : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'; // default avatar placeholder
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmMWY1ZjkiIHJ4PSI4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgc2l6ZT0iMTYiIGZpbGw9IiM5NGFzYjgiIGR5PSIuM2VtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QPC90ZXh0Pjwvc3ZnPg==';
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 border-b border-slate-50 w-12">
-                        <input type="checkbox" class="student-cb rounded border-slate-300 text-primary focus:ring-primary" value="${w.student_id}">
+                    <td class="text-center">
+                        <input type="checkbox" class="wms-checkbox mx-auto student-cb" value="${w.student_id}">
                     </td>
-                    <td class="px-6 py-4 text-slate-500 font-mono text-sm">${w.student_id || '---'}</td>
-                    <td class="px-6 py-4">
+                    <td class="font-mono text-xs font-bold text-slate-400">${w.student_id || '---'}</td>
+                    <td>
                         <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-lg bg-slate-200 bg-cover bg-center border border-slate-100 shadow-sm" style="background-image: url('${photoSrc}');"></div>
-                            <span class="text-slate-900 font-bold group-hover:text-primary transition-colors">${w.student_name}</span>
+                            <div class="size-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden">
+                                <img src="${photoSrc}" class="w-full h-full object-cover">
+                            </div>
+                            <span class="font-bold text-slate-900">${w.student_name}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-slate-600 text-sm">
-                        <div class="font-bold text-slate-800">${w.grade || 'Unassigned'}</div>
-                        <div class="text-[10px] text-slate-400 font-mono tracking-wider">${w.academic_year || '---'}</div>
+                    <td>
+                        <div class="font-bold text-sm text-slate-700">${w.grade || '---'}</div>
+                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${w.academic_year || '---'}</div>
                     </td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="text-right">
                         <div class="flex justify-end gap-2">
-                            <button class="p-2 text-slate-400 hover:text-primary hover:bg-orange-50 rounded-lg transition-all edit-btn" data-id="${w.student_id}">
-                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                            <button class="size-9 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-orange-50 border border-slate-200 flex items-center justify-center transition-all edit-btn" data-id="${w.student_id}">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
                             </button>
-                            <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all delete-btn" data-id="${w.student_id}">
-                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                            <button class="size-9 rounded-xl bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 flex items-center justify-center transition-all delete-btn" data-id="${w.student_id}">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                         </div>
                     </td>
@@ -249,27 +299,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tbody.appendChild(tr);
             });
 
-            // Attach delete events
+            // Re-attach events
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.currentTarget.getAttribute('data-id');
-                    if (confirm("Remove this student profile?")) {
+                    if (confirm("Permanently remove this student?")) {
                         await deleteStudent(id);
                     }
                 });
             });
 
-            // Attach edit events
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.currentTarget.getAttribute('data-id');
-                    await window.openEditModal(id);
+                    await openEditModal(id);
                 });
             });
 
         } catch (error) {
             console.error(error);
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-4">Failed to load data</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-8">Error loading database</td></tr>`;
         }
     }
 
@@ -277,36 +326,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const { error } = await supabase.from('students').delete().eq('college_id', userId).eq('student_id', id);
             if (error) throw error;
+            showToast("Student record deleted.");
             await loadStudents();
         } catch(error) {
             console.error(error);
-            alert("Error deleting student: " + error.message);
+            showToast("Deletion failed: " + error.message, "error");
         }
     }
 
     // --- EDIT MODAL LOGIC ---
-    const editModal = document.getElementById('edit-student-modal');
     const editPhotoInput = document.getElementById('edit-photo-input');
     const editPhotoPreview = document.getElementById('edit-photo-preview');
     const editInputId = document.getElementById('edit-student-id');
     const editInputName = document.getElementById('edit-student-name');
     const editInputPos = document.getElementById('edit-student-grade');
     const editInputYear = document.getElementById('edit-student-academic-year');
-    const btnCloseModal = document.getElementById('btn-close-modal');
-    const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const btnSaveEdit = document.getElementById('btn-save-edit');
 
     let editPhotoBase64 = "";
 
-    function closeEditModal() {
-        editModal.classList.add('hidden');
-        editModal.classList.remove('flex');
-    }
-
-    if (btnCloseModal) btnCloseModal.addEventListener('click', closeEditModal);
-    if (btnCancelEdit) btnCancelEdit.addEventListener('click', closeEditModal);
-
-    window.openEditModal = async function(id) {
+    async function openEditModal(id) {
         try {
             const { data, error } = await supabase.from('students').select('*').eq('college_id', userId).eq('student_id', id).single();
             if (error) throw error;
@@ -316,336 +355,243 @@ document.addEventListener('DOMContentLoaded', async () => {
             editInputPos.value = data.grade || '';
             if(editInputYear) editInputYear.value = data.academic_year || '';
             
-            
             if (data.photo_url) {
                 editPhotoPreview.src = data.photo_url;
+                editPhotoPreview.classList.remove('hidden');
                 editPhotoBase64 = data.photo_url;
             } else {
-                editPhotoPreview.src = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+                editPhotoPreview.classList.add('hidden');
                 editPhotoBase64 = "";
             }
 
-            editModal.classList.remove('hidden');
-            editModal.classList.add('flex');
+            if (window.showEditModal) {
+                window.showEditModal();
+            } else {
+                const modal = document.getElementById('edit-student-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex', 'opacity-100');
+            }
         } catch (err) {
-            console.error("Error opening edit modal:", err);
-            alert("Failed to load student data!");
+            console.error(err);
+            showToast("Failed to load student!", "error");
         }
     }
 
-    if (editPhotoInput) {
-        editPhotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+    editPhotoInput?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const MAX_WIDTH = 256;
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    editPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                    editPhotoPreview.src = editPhotoBase64;
-                }
-                img.src = event.target.result;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 256;
+                canvas.height = img.height * (256 / img.width);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                editPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                editPhotoPreview.src = editPhotoBase64;
+                editPhotoPreview.classList.remove('hidden');
             }
-            reader.readAsDataURL(file);
-        });
-    }
-
-    if (btnSaveEdit) {
-        btnSaveEdit.addEventListener('click', async () => {
-            const id = editInputId.value;
-            const name = editInputName.value.trim();
-            const pos = editInputPos.value;
-
-            if (!name) {
-                alert("Please provide a valid Name!");
-                return;
-            }
-
-            const btnText = btnSaveEdit.textContent;
-            btnSaveEdit.textContent = "Saving...";
-            btnSaveEdit.disabled = true;
-
-            try {
-                const payload = {
-                    student_name: name,
-                    grade: pos,
-                    photo_url: editPhotoBase64
-                };
-                if (editInputYear) payload.academic_year = editInputYear.value;
-
-                const { data, error } = await supabase.from('students').update(payload).eq('college_id', userId).eq('student_id', id);
-                if (error) throw error;
-
-                closeEditModal();
-                await loadStudents(); // Refresh table
-            } catch (err) {
-                console.error("Error updating student:", err);
-                alert("Error updating student: " + err.message);
-            } finally {
-                btnSaveEdit.textContent = btnText;
-                btnSaveEdit.disabled = false;
-            }
-        });
-    }
-
-    const btnExportCsv = document.getElementById('btn-export-csv');
-    if (btnExportCsv) {
-        btnExportCsv.addEventListener('click', async () => {
-            try {
-                const { data, error } = await supabase.from('students').select('*').eq('college_id', userId).order('student_id', { ascending: true });
-                if (error) throw error;
-                if (!data || data.length === 0) return alert("No data to export.");
-
-                const headers = ["student_id", "student_name", "grade", "reg_date", "status"];
-                const csvRows = [headers.join(",")];
-                
-                data.forEach(row => {
-                    const values = headers.map(header => {
-                        let val = row[header] === null ? "" : String(row[header]);
-                        // Escape quotes and wrap in quotes if contains comma
-                        val = val.replace(/"/g, '""');
-                        if (val.search(/("|,|\n)/g) >= 0) val = `"${val}"`;
-                        return val;
-                    });
-                    csvRows.push(values.join(","));
-                });
-
-                const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.setAttribute('href', url);
-                a.setAttribute('download', `students_export_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (err) {
-                console.error("Export error:", err);
-                alert("Export failed: " + err.message);
-            }
-        });
-    }
-
-    // --- CSV IMPORT LOGIC ---
-    const importCsvFileInput = document.getElementById('import-csv-file');
-    if (importCsvFileInput) {
-        importCsvFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const text = event.target.result;
-                    const lines = text.split('\n').filter(line => line.trim() !== '');
-                    if (lines.length < 2) return alert("CSV file seems empty or invalid.");
-
-                    // Fetch latest ID for sequential generation in import
-                    const { data: lastStudent } = await supabase
-                        .from('students')
-                        .select('student_id')
-                        .eq('college_id', userId)
-                        .like('student_id', 'std%')
-                        .order('student_id', { ascending: false })
-                        .limit(1);
-                    
-                    let nextIdNum = 1;
-                    if (lastStudent && lastStudent.length > 0) {
-                        const lastId = lastStudent[0].student_id;
-                        const match = lastId.match(/std(\d+)/);
-                        if (match) nextIdNum = parseInt(match[1]) + 1;
-                    }
-
-                    const headers = lines[0].toLowerCase().split(',');
-                    const nameIdx = headers.findIndex(h => h.includes('name'));
-                    const posIdx = headers.findIndex(h => h.includes('grade') || h.includes('stage'));
-                    const yearIdx = headers.findIndex(h => h.includes('year') || h.includes('academic'));
-
-                    if (nameIdx === -1) {
-                        return alert("CSV must have a 'Name' column.");
-                    }
-
-                    const newStudents = [];
-                    for (let i = 1; i < lines.length; i++) {
-                        const cols = lines[i].split(',');
-                        const student_name = cols[nameIdx]?.trim();
-                        if (!student_name) continue;
-                        
-                        const pos = posIdx !== -1 ? cols[posIdx]?.trim() : '';
-                        const year = yearIdx !== -1 ? cols[yearIdx]?.trim() : '';
-                        const id = "std" + String(nextIdNum++).padStart(3, '0');
-
-                        newStudents.push({ 
-                            student_id: id, 
-                            college_id: userId,
-                            student_name: student_name, 
-                            grade: pos,
-                            academic_year: year || window.WMSSettings?.get('academic_year') || ''
-                        });
-                    }
-
-                    if (newStudents.length === 0) return alert("No valid students found to import.");
-
-                    if (confirm(`Found ${newStudents.length} students to import. Proceed?`)) {
-                        const { error } = await supabase.from('students').insert(newStudents);
-                        if (error) throw error;
-                        alert("Successfully imported " + newStudents.length + " students!");
-                        await loadStudents();
-                    }
-                } catch (err) {
-                    console.error("Import error:", err);
-                    alert("Import failed: " + err.message);
-                } finally {
-                    importCsvFileInput.value = ''; // Reset input so it can be re-fired
-                }
-            };
-            reader.readAsText(file);
-        });
-    }
-
-    // --- BULK ACTION LOGIC ---
-    const selectAllCheckbox = document.getElementById('selectAllStudents');
-    const bulkActionBar = document.getElementById('bulk-action-bar');
-    const bulkSelectedCount = document.getElementById('bulk-selected-count');
-    
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
-            document.querySelectorAll('.student-cb').forEach(cb => cb.checked = isChecked);
-            updateBulkActionBar();
-        });
-    }
-
-    if (tbody) {
-        tbody.addEventListener('change', (e) => {
-            if (e.target.classList.contains('student-cb')) {
-                updateBulkActionBar();
-            }
-        });
-    }
-
-    if (searchInput) searchInput.addEventListener('input', loadStudents);
-    if (filterStage) filterStage.addEventListener('change', loadStudents);
-
-    if (sortBtn) {
-        sortBtn.addEventListener('click', () => {
-            sortAscending = !sortAscending;
-            if (sortIcon) {
-                sortIcon.textContent = sortAscending ? 'arrow_upward' : 'arrow_downward';
-                sortIcon.classList.remove('opacity-40');
-                sortIcon.classList.add('text-primary', 'opacity-100');
-            }
-            loadStudents();
-        });
-    }
-
-    function updateBulkActionBar() {
-        if (!bulkActionBar) return;
-        const checked = document.querySelectorAll('.student-cb:checked').length;
-        if (checked > 0) {
-            bulkActionBar.classList.remove('hidden');
-            
-            // Localized count
-            const lang = window.WMSSettings?.get('lang') || 'en';
-            const template = window.WMS_I18N[lang]['bulk-selected'] || '{n} Selected';
-            bulkSelectedCount.textContent = template.replace('{n}', checked);
-        } else {
-            bulkActionBar.classList.add('hidden');
-            if(selectAllCheckbox) selectAllCheckbox.checked = false;
+            img.src = event.target.result;
         }
-    }
+        reader.readAsDataURL(file);
+    });
 
-    function getNextGrade(current) {
-        const grades = ["First Year", "Second Year", "Third Year", "Fourth Year"];
-        const idx = grades.indexOf(current);
-        if (idx === -1) return current; // unknown or already graduated
-        if (idx === grades.length - 1) return "Graduated";
-        return grades[idx + 1];
-    }
+    btnSaveEdit?.addEventListener('click', async () => {
+        const id = editInputId.value;
+        const name = editInputName.value.trim();
+        const pos = editInputPos.value;
 
-    async function applyBulkOperation(actionType) {
-        const targetYear = document.getElementById('target-academic-year').value;
-        if (!targetYear && actionType !== 'graduate') {
-            return alert("Please specify the Target Academic Year to proceed with promotions or retentions.");
+        if (!name) {
+            showToast("Invalid data!", "error");
+            return;
         }
-        
-        const selectedIds = Array.from(document.querySelectorAll('.student-cb:checked')).map(cb => cb.value);
-        if (selectedIds.length === 0) return;
 
-        if (!confirm(`Are you sure you want to ${actionType} ${selectedIds.length} students?`)) return;
+        const btnText = btnSaveEdit.innerHTML;
+        btnSaveEdit.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span><span>Saving...</span>`;
+        btnSaveEdit.disabled = true;
 
         try {
-            const { data: studentsData, error: fetchErr } = await supabase.from('students').select('*').eq('college_id', userId).in('student_id', selectedIds);
-            if (fetchErr) throw fetchErr;
+            const payload = {
+                student_name: name,
+                grade: pos,
+                photo_url: editPhotoBase64
+            };
+            if (editInputYear) payload.academic_year = editInputYear.value;
 
-            const historyInserts = [];
-            const studentUpdates = [];
+            const { error } = await supabase.from('students').update(payload).eq('college_id', userId).eq('student_id', id);
+            if (error) throw error;
 
-            for (const student of studentsData) {
-                let newGrade = student.grade;
-                let newStatus = student.status || 'Active';
-                
-                // Record the outcome of the CURRENT year into history
-                historyInserts.push({
-                    student_id: student.student_id,
-                    college_id: userId,
-                    student_name: student.student_name,
-                    academic_year: student.academic_year || 'Unknown',
-                    grade: student.grade || 'Unknown',
-                    status: actionType === 'promote' ? 'Passed' : (actionType === 'fail' ? 'Failed' : 'Graduated')
-                });
-
-                if (actionType === 'promote') {
-                    newGrade = getNextGrade(student.grade);
-                    if (newGrade === 'Graduated') newStatus = 'Graduated';
-                } else if (actionType === 'graduate') {
-                    newStatus = 'Graduated';
-                }
-                
-                studentUpdates.push({
-                    student_id: student.student_id,
-                    academic_year: targetYear || student.academic_year,
-                    grade: newGrade,
-                    status: newStatus
-                });
-            }
-
-            // Execute Updates one by one (or bulk if supported, but loop is safer for simple clients)
-            for (const update of studentUpdates) {
-                const { error: updErr } = await supabase.from('students').update({
-                    academic_year: update.academic_year,
-                    grade: update.grade,
-                    status: update.status
-                }).eq('college_id', userId).eq('student_id', update.student_id);
-                if (updErr) throw updErr;
-            }
-
-            // Insert into history table
-            const { error: histErr } = await supabase.from('student_history').insert(historyInserts);
-            if (histErr) throw histErr;
-
-            alert(`Successfully applied progression to ${selectedIds.length} students.`);
-            if(selectAllCheckbox) selectAllCheckbox.checked = false;
-            updateBulkActionBar();
+            if (window.hideEditModal) window.hideEditModal();
+            else document.getElementById('edit-student-modal').classList.add('hidden');
+            
+            showToast("Changes saved successfully!");
             await loadStudents();
-
         } catch (err) {
-            console.error("Bulk action failed:", err);
-            alert("Bulk action failed: " + err.message);
+            console.error(err);
+            showToast("Save failed!", "error");
+        } finally {
+            btnSaveEdit.innerHTML = btnText;
+            btnSaveEdit.disabled = false;
+        }
+    });
+
+    // --- EXPORT/IMPORT ---
+    document.getElementById('btn-export-csv')?.addEventListener('click', async () => {
+        try {
+            const { data, error } = await supabase.from('students').select('*').eq('college_id', userId).order('student_id', { ascending: true });
+            if (error) throw error;
+            if (!data || data.length === 0) return showToast("Nothing to export.", "error");
+
+            const headers = ["student_id", "student_name", "grade", "academic_year"];
+            let csv = headers.join(",") + "\n";
+            data.forEach(row => {
+                csv += headers.map(h => `"${(row[h] || '').toString().replace(/"/g, '""')}"`).join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `students_${new Date().toLocaleDateString()}.csv`;
+            a.click();
+            showToast("Export complete!");
+        } catch (err) {
+            showToast("Export failed!", "error");
+        }
+    });
+
+    document.getElementById('import-csv-file')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const lines = event.target.result.split('\n').map(l => l.trim()).filter(l => l);
+                if (lines.length < 2) throw new Error("File empty");
+
+                const { data: lastStudent } = await supabase.from('students').select('student_id').eq('college_id', userId).like('student_id', 'std%').order('student_id', { ascending: false }).limit(1);
+                let nextId = 1;
+                if(lastStudent?.[0]?.student_id) nextId = parseInt(lastStudent[0].student_id.replace('std', '')) + 1;
+
+                const headers = lines[0].toLowerCase().split(',');
+                const nameIdx = headers.findIndex(h => h.includes('name'));
+                const gradeIdx = headers.findIndex(h => h.includes('grade'));
+                const yearIdx = headers.findIndex(h => h.includes('year'));
+
+                const batch = [];
+                for(let i=1; i<lines.length; i++) {
+                    const row = lines[i].split(',').map(v => v.replace(/"/g, ''));
+                    if(!row[nameIdx]) continue;
+                    batch.push({
+                        student_id: "std" + String(nextId++).padStart(3, '0'),
+                        college_id: userId,
+                        student_name: row[nameIdx],
+                        grade: row[gradeIdx] || '',
+                        academic_year: row[yearIdx] || window.WMSSettings?.get('academic_year')?.replace('-','/') || ''
+                    });
+                }
+
+                if(batch.length > 0) {
+                    const { error } = await supabase.from('students').insert(batch);
+                    if(error) throw error;
+                    showToast(`Imported ${batch.length} students!`);
+                    await loadStudents();
+                }
+            } catch (err) {
+                showToast("Import failed!", "error");
+            } finally {
+                e.target.value = '';
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // --- BULK LOGIC ---
+    const selectAll = document.getElementById('selectAllStudents');
+    const bulkBar = document.getElementById('bulk-action-bar');
+    const bulkCount = document.getElementById('bulk-selected-count');
+
+    function updateBulk() {
+        const checked = document.querySelectorAll('.student-cb:checked');
+        if (checked.length > 0) {
+            bulkBar.classList.remove('hidden');
+            bulkBar.classList.add('flex');
+            bulkCount.textContent = checked.length;
+        } else {
+            bulkBar.classList.add('hidden');
+            bulkBar.classList.remove('flex');
+            if(selectAll) selectAll.checked = false;
         }
     }
 
-    document.getElementById('btn-bulk-promote')?.addEventListener('click', () => applyBulkOperation('promote'));
-    document.getElementById('btn-bulk-retain')?.addEventListener('click', () => applyBulkOperation('fail'));
-    document.getElementById('btn-bulk-graduate')?.addEventListener('click', () => applyBulkOperation('graduate'));
+    selectAll?.addEventListener('change', (e) => {
+        document.querySelectorAll('.student-cb').forEach(cb => cb.checked = e.target.checked);
+        updateBulk();
+    });
 
+    tbody?.addEventListener('change', (e) => {
+        if (e.target.classList.contains('student-cb')) updateBulk();
+    });
+
+    searchInput?.addEventListener('input', loadStudents);
+    filterStage?.addEventListener('change', loadStudents);
+
+    sortBtn?.addEventListener('click', () => {
+        sortAscending = !sortAscending;
+        sortIcon.textContent = sortAscending ? 'arrow_upward' : 'arrow_downward';
+        sortIcon.classList.remove('opacity-40');
+        sortIcon.classList.add('text-primary');
+        loadStudents();
+    });
+
+    async function applyBulk(action) {
+        const targetYear = document.getElementById('target-academic-year').value;
+        if (!targetYear && action !== 'graduate') return showToast("Select Target Year", "error");
+        
+        const ids = Array.from(document.querySelectorAll('.student-cb:checked')).map(cb => cb.value);
+        if (!confirm(`Apply to ${ids.length} students?`)) return;
+
+        try {
+            const { data } = await supabase.from('students').select('*').in('student_id', ids);
+            const updates = data.map(s => {
+                let grade = s.grade;
+                let status = s.status || 'Active';
+                if (action === 'promote') {
+                    const g = ["المرحلة الاولى", "المرحلة الثانية", "المرحلة الثالثة", "المرحلة الرابعة"];
+                    const i = g.findIndex(x => s.grade?.includes(x));
+                    if(i !== -1 && i < g.length-1) grade = s.grade.replace(g[i], g[i+1]);
+                    else if(i === g.length-1) status = 'Graduated';
+                }
+                if (action === 'graduate') status = 'Graduated';
+                return { ...s, grade, academic_year: targetYear || s.academic_year, status };
+            });
+
+            for(const up of updates) {
+                await supabase.from('students').update({ grade: up.grade, academic_year: up.academic_year, status: up.status }).eq('student_id', up.student_id);
+            }
+            showToast("Bulk action completed!");
+            updateBulk();
+            await loadStudents();
+        } catch (err) {
+            showToast("Bulk failed!", "error");
+        }
+    }
+
+    document.getElementById('btn-bulk-graduate')?.addEventListener('click', () => applyBulk('graduate'));
+
+    // --- REAL-TIME SETTINGS SYNC ---
+    window.addEventListener('wms-settings-update', (e) => {
+        if (e.detail.k === 'academic_year') {
+            if (studentAY) {
+                studentAY.value = e.detail.v; // Now standardized to slash
+            }
+            loadStudents();
+        }
+    });
 });
+
 

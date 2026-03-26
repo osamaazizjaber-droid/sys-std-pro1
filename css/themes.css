@@ -134,6 +134,7 @@
 body {
   background-color: var(--clr-bg) !important;
   color: var(--clr-text) !important;
+  font-family: var(--wms-font), "Inter", sans-serif !important;
   transition: background-color 0.25s, color 0.25s;
 }
 
@@ -263,3 +264,103 @@ thead tr {
 [data-dark="true"] [class*="shadow-"] {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
+
+/* ============================================================
+   FORMAL ACADEMIC REPORT TABLE
+   Matches the formal template exactly.
+   ============================================================ */
+
+.report-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* ── Header row ── */
+.report-table thead tr th {
+  background: #d97706;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px 10px;
+  border: 1px solid #92400e;
+  white-space: nowrap;
+}
+
+/* ── Student data rows ── */
+.report-table tbody tr td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 8px;
+  vertical-align: middle;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Serial column */
+.report-table .col-serial {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  text-align: center;
+  width: 36px;
+}
+
+/* Name column */
+.report-table .col-name {
+  background: #ffffff;
+  color: #1e293b;
+  font-weight: 600;
+  text-align: start;
+  min-width: 150px;
+}
+
+/* Status cells */
+.report-table .cell-present {
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.report-table .cell-absent {
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.report-table .cell-leave {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.report-table .cell-norecord {
+  background: #bfdbfe;
+  color: #1e3a8a;
+  font-weight: 600;
+  text-align: center;
+  font-size: 11px;
+}
+
+.report-table .cell-empty {
+  background: #ffffff;
+  min-width: 90px;
+  height: 26px;
+}
+
+/* Total % col for range mode */
+.report-table .col-total {
+  font-weight: 800;
+  text-align: center;
+  background: #f8fafc;
+  color: var(--clr-primary);
+}
+.report-table .col-total.at-risk {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
