@@ -51,6 +51,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // --- ID Copy Utility ---
+    window.copyId = function(id, el) {
+        navigator.clipboard.writeText(id).then(() => {
+            const originalHTML = el.innerHTML;
+            const icon = el.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = 'check';
+            showToast("Copied Professor ID: " + id);
+            setTimeout(() => {
+                if (icon) icon.textContent = 'content_copy';
+            }, 2000);
+        });
+    };
+
     // --- Photo Handling ---
     async function scaleImage(base64, size = 256) {
         return new Promise((resolve) => {
@@ -139,7 +152,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td class="text-center">
                     <input type="checkbox" class="wms-checkbox mx-auto prof-cb" data-id="${p.prof_id}">
                 </td>
-                <td class="text-xs font-mono font-bold text-slate-400">#${p.prof_id.split('-').pop() || p.prof_id}</td>
+                <td class="text-xs font-mono font-bold text-slate-400">
+                    <div class="flex items-center gap-1.5 group/id cursor-pointer" onclick="copyId('${p.prof_id}', this)">
+                        <span>${p.prof_id}</span>
+                        <span class="material-symbols-outlined text-[14px] opacity-0 group-hover/id:opacity-100 transition-opacity text-primary">content_copy</span>
+                    </div>
+                </td>
                 <td>
                     <div class="flex items-center gap-3">
                         <div class="size-10 rounded-xl bg-slate-100 overflow-hidden border border-slate-200">
