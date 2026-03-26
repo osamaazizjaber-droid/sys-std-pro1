@@ -583,6 +583,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('btn-bulk-graduate')?.addEventListener('click', () => applyBulk('graduate'));
 
+    // --- BACK TO TOP LOGIC ---
+    const backToTopBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
+        } else {
+            backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
+        }
+    });
+
+    backToTopBtn?.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
     // --- REAL-TIME SETTINGS SYNC ---
     window.addEventListener('wms-settings-update', (e) => {
         if (e.detail.k === 'academic_year') {

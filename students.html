@@ -480,7 +480,10 @@
     <script src="js/guard.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/students.js"></script>
-    <script>
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 z-[100] bg-[#f49000] text-white size-12 rounded-full shadow-2xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20">
+        <span class="material-symbols-outlined text-[24px] font-black">arrow_upward</span>
+    </button>
     // Visual toggles for Modal (To be controlled by students.js, adding safe defaults)
     const modal = document.getElementById('edit-student-modal');
     const modalInner = modal.querySelector('.bg-white');
